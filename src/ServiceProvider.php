@@ -2,6 +2,7 @@
 
 namespace nickurt\Akismet;
 
+use \Config;
 use \nickurt\Akismet\ProviderFactory;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
@@ -22,10 +23,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $this->app->bindShared('Akismet', function($app)
         {
-            return new \nickurt\Akismet\Akismet(
-                \Config::get('akismet')['api_key'],
-                \Config::get('akismet')['blog_url']
-            );
+            $akismet = new Akismet();
+            $akismet->setApiKey( Config::get('akismet')['api_key'] );
+            $akismet->setBlogUrl( Config::get('akismet')['blog_url'] );
+
+            return $akismet;
         });
     }
 

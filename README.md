@@ -78,4 +78,20 @@ if( \Akismet::reportHam() )
     // yes, thanks!
 }
 ```
+#### Use as standalone (without Laravel)
+```php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use \nickurt\Akismet\Akismet;
+
+$akismet = new Akismet();
+$akismet->setApiKey('MY_API_KEY');
+$akismet->setBlogUrl('https://www.google.com');
+$akismet->setCommentAuthor('John Doe');
+
+if( $akismet->isSpam() )
+{
+    // yes, i'm spam!
+}
+```
 - - - 

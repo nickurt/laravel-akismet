@@ -52,16 +52,6 @@ class Akismet {
     protected $commentContent;
 
     /**
-     * @param $apiKey
-     * @param $blogUrl
-     */
-    public function __construct($apiKey, $blogUrl)
-    {
-        $this->setApiKey($apiKey);
-        $this->setBlogUrl($blogUrl);
-    }
-
-    /**
      * @return string
      */
     public function getApiBaseUrl()

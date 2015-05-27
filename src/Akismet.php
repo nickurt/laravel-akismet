@@ -236,6 +236,7 @@ class Akismet {
     }
 
     /**
+     * isSpam
      * @return bool
      */
     public function isSpam()
@@ -253,19 +254,6 @@ class Akismet {
             'comment_content'       =>	$this->getCommentContent(),
             'blog'                  =>  $this->getBlogUrl(),
         ]]);
-
-        print_r([
-            'user_ip'               =>	$_SERVER['REMOTE_ADDR'],
-            'user_agent'            =>	$_SERVER['HTTP_USER_AGENT'],
-            'referrer'              =>	$_SERVER['HTTP_REFERER'],
-//          'permalink'             =>	'',
-            'comment_type'          =>	$this->getCommentType(),
-            'comment_author'        =>	$this->getCommentAuthor(),
-            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
-            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
-            'comment_content'       =>	$this->getCommentContent(),
-            'blog'                  =>  $this->getBlogUrl(),
-        ]);
 
         return (bool) (trim($request->getBody()) == 'true');
     }

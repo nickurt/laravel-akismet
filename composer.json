@@ -1,0 +1,16 @@
+{
+    "name": "nickurt/laravel-akismet",
+    "description": "Akismet for Laravel 5",
+    "keywords": ["akismet", "laravel"],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.0",
+        "guzzlehttp/guzzle": "5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "nickurt\\Akismet\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

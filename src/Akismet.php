@@ -214,17 +214,49 @@ class Akismet {
     }
 
     /**
+     * @return string
+     */
+    public function getUserIp()
+    {
+        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getReferrer()
+    {
+        return class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPermalink()
+    {
+        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
+    }
+
+    /**
      * @return bool
      */
     public function validateKey()
     {
         $client = new Client();
-        $request = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
+        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
             'key'   => $this->getApiKey(),
             'blog'  => $this->getBlogUrl(),
         ]]);
 
-        return (bool) ($request->getBody() == 'valid');
+        return (bool) ($response->getBody() == 'valid');
     }
 
     /**
@@ -233,21 +265,14 @@ class Akismet {
      */
     public function isSpam()
     {
-        $client = new Client();
-        $request = $client->post(sprintf('https://%s.%s/%s/comment-check', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
-            'user_ip'               =>	\Request::getClientIp(),
-            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
-            'referrer'              =>	\URL::previous(),
-            'permalink'             =>	\Request::url(),
-            'comment_type'          =>	$this->getCommentType(),
-            'comment_author'        =>	$this->getCommentAuthor(),
-            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
-            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
-            'comment_content'       =>	$this->getCommentContent(),
-            'blog'                  =>  $this->getBlogUrl(),
-        ]]);
+        $response = $this->getResponseData(
+            sprintf('https://%s.%s/%s/comment-check',
+                $this->getApiKey(),
+                $this->getApiBaseUrl(),
+                $this->getApiVersion()
+            ));
 
-        return (bool) (trim($request->getBody()) == 'true');
+        return (bool) (trim($response->getBody()) == 'true');
     }
 
     /**
@@ -256,21 +281,14 @@ class Akismet {
      */
     public function reportSpam()
     {
-        $client = new Client();
-        $request = $client->post(sprintf('https://%s.%s/%s/submit-spam', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
-            'user_ip'               =>	\Request::getClientIp(),
-            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
-            'referrer'              =>	\URL::previous(),
-            'permalink'             =>	\Request::url(),
-            'comment_type'          =>	$this->getCommentType(),
-            'comment_author'        =>	$this->getCommentAuthor(),
-            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
-            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
-            'comment_content'       =>	$this->getCommentContent(),
-            'blog'                  =>  $this->getBlogUrl(),
-        ]]);
+        $response = $this->getResponseData(
+            sprintf('https://%s.%s/%s/submit-spam',
+                $this->getApiKey(),
+                $this->getApiBaseUrl(),
+                $this->getApiVersion()
+            ));
 
-        return (bool) (trim($request->getBody()) == 'Thanks for making the web a better place.');
+        return (bool) (trim($response->getBody()) == 'Thanks for making the web a better place.');
     }
 
     /**
@@ -279,12 +297,28 @@ class Akismet {
      */
     public function reportHam()
     {
+        $response = $this->getResponseData(
+            sprintf('https://%s.%s/%s/submit-ham',
+                $this->getApiKey(),
+                $this->getApiBaseUrl(),
+                $this->getApiVersion()
+            ));
+
+        return (bool) (trim($response->getBody()) == 'Thanks for making the web a better place.');
+    }
+
+    /**
+     * @param $url
+     * @return \GuzzleHttp\Message\FutureResponse|\GuzzleHttp\Message\ResponseInterface|\GuzzleHttp\Ring\Future\FutureInterface|null
+     */
+    private function getResponseData($url)
+    {
         $client = new Client();
-        $request = $client->post(sprintf('https://%s.%s/%s/submit-ham', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
-            'user_ip'               =>	\Request::getClientIp(),
-            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
-            'referrer'              =>	\URL::previous(),
-            'permalink'             =>	\Request::url(),
+        $request = $client->post($url, ['body' => [
+            'user_ip'               =>	$this->getUserIp(),
+            'user_agent'            =>	$this->getUserAgent(),
+            'referrer'              =>	$this->getReferrer(),
+            'permalink'             =>	$this->getPermalink(),
             'comment_type'          =>	$this->getCommentType(),
             'comment_author'        =>	$this->getCommentAuthor(),
             'comment_author_email'  =>	$this->getCommentAuthorEmail(),
@@ -293,6 +327,6 @@ class Akismet {
             'blog'                  =>  $this->getBlogUrl(),
         ]]);
 
-        return (bool) (trim($request->getBody()) == 'Thanks for making the web a better place.');
+        return $request;
     }
 }

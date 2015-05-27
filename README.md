@@ -57,11 +57,25 @@ if( \Akismet::getCommentAuthor() == 'John Doe' )
     // it's me John!
 }
 ```
-#### isSpam?
+#### Is it Spam?
 ```php
 if( \Akismet::isSpam() )
 {
     // yes, i'm spam!
+}
+```
+#### Submit Spam (missed spam)
+```php
+if( \Akismet::reportSpam() )
+{
+    // yes, thanks!
+}
+```
+#### Submit ham (false positives)
+```php
+if( \Akismet::reportHam() )
+{
+    // yes, thanks!
 }
 ```
 - - - 

@@ -2,6 +2,8 @@
 
 namespace nickurt\Akismet;
 
+use \GuzzleHttp\Client;
+
 class Akismet {
 
     /**
@@ -226,7 +228,7 @@ class Akismet {
      */
     public function validateKey()
     {
-        $client = new \GuzzleHttp\Client();
+        $client = new Client();
         $request = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
             'key'   => $this->getApiKey(),
             'blog'  => $this->getBlogUrl(),
@@ -241,12 +243,12 @@ class Akismet {
      */
     public function isSpam()
     {
-        $client = new \GuzzleHttp\Client();
+        $client = new Client();
         $request = $client->post(sprintf('https://%s.%s/%s/comment-check', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
-            'user_ip'               =>	$_SERVER['REMOTE_ADDR'],
-            'user_agent'            =>	$_SERVER['HTTP_USER_AGENT'],
-            'referrer'              =>	$_SERVER['HTTP_REFERER'],
-//          'permalink'             =>	'',
+            'user_ip'               =>	\Request::getClientIp(),
+            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
+            'referrer'              =>	\URL::previous(),
+            'permalink'             =>	\Request::url(),
             'comment_type'          =>	$this->getCommentType(),
             'comment_author'        =>	$this->getCommentAuthor(),
             'comment_author_email'  =>	$this->getCommentAuthorEmail(),
@@ -258,13 +260,49 @@ class Akismet {
         return (bool) (trim($request->getBody()) == 'true');
     }
 
+    /**
+     * reportSpam
+     * @return bool
+     */
     public function reportSpam()
     {
+        $client = new Client();
+        $request = $client->post(sprintf('https://%s.%s/%s/submit-spam', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
+            'user_ip'               =>	\Request::getClientIp(),
+            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
+            'referrer'              =>	\URL::previous(),
+            'permalink'             =>	\Request::url(),
+            'comment_type'          =>	$this->getCommentType(),
+            'comment_author'        =>	$this->getCommentAuthor(),
+            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
+            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
+            'comment_content'       =>	$this->getCommentContent(),
+            'blog'                  =>  $this->getBlogUrl(),
+        ]]);
 
+        return (bool) (trim($request->getBody()) == 'Thanks for making the web a better place.');
     }
 
+    /**
+     * reportHam
+     * @return bool
+     */
     public function reportHam()
     {
+        $client = new Client();
+        $request = $client->post(sprintf('https://%s.%s/%s/submit-ham', $this->getApiKey(), $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
+            'user_ip'               =>	\Request::getClientIp(),
+            'user_agent'            =>	\Request::server('HTTP_USER_AGENT'),
+            'referrer'              =>	\URL::previous(),
+            'permalink'             =>	\Request::url(),
+            'comment_type'          =>	$this->getCommentType(),
+            'comment_author'        =>	$this->getCommentAuthor(),
+            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
+            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
+            'comment_content'       =>	$this->getCommentContent(),
+            'blog'                  =>  $this->getBlogUrl(),
+        ]]);
 
+        return (bool) (trim($request->getBody()) == 'Thanks for making the web a better place.');
     }
 }

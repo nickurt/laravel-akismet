@@ -52,6 +52,11 @@ class Akismet {
     protected $commentContent;
 
     /**
+     * @var
+     */
+    protected $isTest = false;
+
+    /**
      * @return string
      */
     public function getApiBaseUrl()
@@ -214,6 +219,24 @@ class Akismet {
     }
 
     /**
+     * @return bool
+     */
+    public function getIsTest()
+    {
+        return $this->isTest;
+    }
+
+    /**
+     * @param $isTest
+     * @return $this
+     */
+    public function setIsTest($isTest)
+    {
+        $this->isTest = $isTest;
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getUserIp()
@@ -314,19 +337,28 @@ class Akismet {
     private function getResponseData($url)
     {
         $client = new Client();
-        $request = $client->post($url, ['body' => [
-            'user_ip'               =>	$this->getUserIp(),
-            'user_agent'            =>	$this->getUserAgent(),
-            'referrer'              =>	$this->getReferrer(),
-            'permalink'             =>	$this->getPermalink(),
-            'comment_type'          =>	$this->getCommentType(),
-            'comment_author'        =>	$this->getCommentAuthor(),
-            'comment_author_email'  =>	$this->getCommentAuthorEmail(),
-            'comment_author_url'    =>	$this->getCommentAuthorUrl(),
-            'comment_content'       =>	$this->getCommentContent(),
-            'blog'                  =>  $this->getBlogUrl(),
-        ]]);
+        $request = $client->post($url, ['body' => $this->toArray()]);
 
         return $request;
+    }
+
+    /**
+     * @return array
+     */ 
+    public function toArray()
+    {
+        return [
+            'user_ip'               =>  $this->getUserIp(),
+            'user_agent'            =>  $this->getUserAgent(),
+            'referrer'              =>  $this->getReferrer(),
+            'permalink'             =>  $this->getPermalink(),
+            'comment_type'          =>  $this->getCommentType(),
+            'comment_author'        =>  $this->getCommentAuthor(),
+            'comment_author_email'  =>  $this->getCommentAuthorEmail(),
+            'comment_author_url'    =>  $this->getCommentAuthorUrl(),
+            'comment_content'       =>  $this->getCommentContent(),
+            'blog'                  =>  $this->getBlogUrl(),
+            'is_test'               =>  $this->getIsTest(),
+        ];
     }
 }

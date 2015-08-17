@@ -3,6 +3,7 @@
 namespace nickurt\Akismet;
 
 use \GuzzleHttp\Client;
+use \nickurt\Akismet\Exception\MalformedURLException;
 
 class Akismet {
 
@@ -120,10 +121,15 @@ class Akismet {
 
     /**
      * @param $blogUrl
+     * @throws \nickurt\Akismet\Exception\MalformedURLException
      * @return $this
      */
     public function setBlogUrl($blogUrl)
     {
+        if( filter_var($blogUrl, FILTER_VALIDATE_URL) === false ) {
+            throw new MalformedURLException();
+        }
+
         $this->blogUrl = $blogUrl;
         return $this;
     }
@@ -192,10 +198,15 @@ class Akismet {
 
     /**
      * @param $commentAuthorUrl
+     * @throws \nickurt\Akismet\Exception\MalformedURLException
      * @return $this
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
     {
+        if( filter_var($commentAuthorUrl, FILTER_VALIDATE_URL) === false ) {
+            throw new MalformedURLException();
+        }
+
         $this->commentAuthorUrl = $commentAuthorUrl;
         return $this;
     }

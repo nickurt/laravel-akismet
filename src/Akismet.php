@@ -332,12 +332,19 @@ class Akismet {
 
     /**
      * @param $url
+     * @throws \Exception
      * @return \GuzzleHttp\Message\FutureResponse|\GuzzleHttp\Message\ResponseInterface|\GuzzleHttp\Ring\Future\FutureInterface|null
      */
     private function getResponseData($url)
     {
         $client = new Client();
         $request = $client->post($url, ['body' => $this->toArray()]);
+
+        // Check if the response contains a X-akismet-debug-help header
+        if($request->getHeader('X-akismet-debug-help'))
+        {
+            throw new \Exception($request->getHeader('X-akismet-debug-help'));
+        }
 
         return $request;
     }

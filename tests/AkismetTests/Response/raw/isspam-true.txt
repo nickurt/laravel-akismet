@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sat, 22 Aug 2015 08:34:13 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 4
+Connection: keep-alive
+X-akismet-server: 10.2.21.116
+X-akismet-guid: 5b47eb14befa91e4941f93d03859e34d
+
+true

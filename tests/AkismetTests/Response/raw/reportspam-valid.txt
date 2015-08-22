@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+Server: nginx
+Date: Sat, 22 Aug 2015 08:27:40 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 41
+Connection: keep-alive
+
+Thanks for making the web a better place.

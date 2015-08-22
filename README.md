@@ -94,4 +94,10 @@ if( $akismet->isSpam() )
     // yes, i'm spam!
 }
 ```
+
+### Tests
+```sh
+bin/phpunit nickurt/laravel-akismet/tests
+```
+
 - - - 

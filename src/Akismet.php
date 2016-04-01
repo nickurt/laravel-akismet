@@ -285,7 +285,8 @@ class Akismet {
     public function validateKey()
     {
         $client = new Client();
-        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
+        $requestOption = $this->getRequestOption();
+        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [$requestOption => [
             'key'   => $this->getApiKey(),
             'blog'  => $this->getBlogUrl(),
         ]]);
@@ -349,7 +350,8 @@ class Akismet {
     private function getResponseData($url)
     {
         $client = new Client();
-        $request = $client->post($url, ['body' => $this->toArray()]);
+        $requestOption = $this->getRequestOption();
+        $request = $client->post($url, [$requestOption => $this->toArray()]);
 
         // Check if the response contains a X-akismet-debug-help header
         if($request->getHeader('X-akismet-debug-help'))
@@ -358,6 +360,14 @@ class Akismet {
         }
 
         return $request;
+    }
+
+    /**
+     * @return string
+     */
+    private function getRequestOption()
+    {
+        return (version_compare(\GuzzleHttp\ClientInterface::VERSION, '6.0.0', '<')) ? 'body' : 'form_params';
     }
 
     /**

@@ -25,6 +25,21 @@ class Akismet {
     /**
      * @var
      */
+    protected $userIp;
+
+    /**
+     * @var
+     */
+    protected $userAgent;
+
+    /**
+     * @var
+     */
+    protected $referrer;
+
+    /**
+     * @var
+     */
     protected $blogUrl;
 
     /**
@@ -56,6 +71,13 @@ class Akismet {
      * @var
      */
     protected $isTest = false;
+
+    public function __construct()
+    {
+        $this->userIp = class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
+        $this->userAgent = class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
+        $this->referrer = class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+    }
 
     /**
      * @return string
@@ -252,7 +274,17 @@ class Akismet {
      */
     public function getUserIp()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
+        return $this->userIp;
+    }
+
+    /**
+     * @param $userIp
+     * @return $this
+     */
+    public function setUserIp($userIp)
+    {
+        $this->userIp = $userIp;
+        return $this;
     }
 
     /**
@@ -260,7 +292,17 @@ class Akismet {
      */
     public function getUserAgent()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
+        return $this->userAgent;
+    }
+
+    /**
+     * @param $userAgent
+     * @return $this
+     */
+    public function setUserAgent($userAgent)
+    {
+        $this->userAgent = $userAgent;
+        return $this;
     }
 
     /**
@@ -268,7 +310,17 @@ class Akismet {
      */
     public function getReferrer()
     {
-        return class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+        return $this->referrer;
+    }
+
+    /**
+     * @param $referrer
+     * @return $this
+     */
+    public function setReferrer($referrer)
+    {
+        $this->referrer = $referrer;
+        return $this;
     }
 
     /**
@@ -372,7 +424,7 @@ class Akismet {
 
     /**
      * @return array
-     */ 
+     */
     public function toArray()
     {
         return [

@@ -40,6 +40,11 @@ class Akismet {
     /**
      * @var
      */
+    protected $permalink;
+
+    /**
+     * @var
+     */
     protected $blogUrl;
 
     /**
@@ -77,6 +82,7 @@ class Akismet {
         $this->userIp = class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
         $this->userAgent = class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
         $this->referrer = class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+        $this->permalink = class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
     }
 
     /**
@@ -328,7 +334,17 @@ class Akismet {
      */
     public function getPermalink()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
+        return $this->permalink;
+    }
+
+    /**
+     * @param $permalink
+     * @return $this
+     */
+    public function setPermalink($permalink)
+    {
+        $this->permalink = $permalink;
+        return $this;
     }
 
     /**

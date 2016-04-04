@@ -457,4 +457,24 @@ class Akismet {
             'is_test'               =>  $this->getIsTest(),
         ];
     }
+
+    /**
+     * @return $this
+     */
+    public function fill(array $attributes)
+    {
+        if(isset($attributes['user_ip'])) $this->setUserIp($attributes['user_ip']);
+        if(isset($attributes['user_agent'])) $this->setUserAgent($attributes['user_agent']);
+        if(isset($attributes['referrer'])) $this->setReferrer($attributes['referrer']);
+        if(isset($attributes['permalink'])) $this->setPermalink($attributes['permalink']);
+        if(isset($attributes['comment_type'])) $this->setCommentType($attributes['comment_type']);
+        if(isset($attributes['comment_author'])) $this->setCommentAuthor($attributes['comment_author']);
+        if(isset($attributes['comment_author_email'])) $this->setCommentAuthorEmail($attributes['comment_author_email']);
+        if(isset($attributes['comment_author_url'])) $this->setCommentAuthorUrl($attributes['comment_author_url']);
+        if(isset($attributes['comment_content'])) $this->setCommentContent($attributes['comment_content']);
+        if(isset($attributes['blog'])) $this->setBlogUrl($attributes['blog']);
+        if(isset($attributes['is_test'])) $this->setIsTest($attributes['is_test']);
+
+        return $this;
+    }
 }

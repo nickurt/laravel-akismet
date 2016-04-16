@@ -25,6 +25,26 @@ class Akismet {
     /**
      * @var
      */
+    protected $userIp;
+
+    /**
+     * @var
+     */
+    protected $userAgent;
+
+    /**
+     * @var
+     */
+    protected $referrer;
+
+    /**
+     * @var
+     */
+    protected $permalink;
+
+    /**
+     * @var
+     */
     protected $blogUrl;
 
     /**
@@ -56,6 +76,14 @@ class Akismet {
      * @var
      */
     protected $isTest = false;
+
+    public function __construct()
+    {
+        $this->userIp = class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
+        $this->userAgent = class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
+        $this->referrer = class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+        $this->permalink = class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
+    }
 
     /**
      * @return string
@@ -252,7 +280,17 @@ class Akismet {
      */
     public function getUserIp()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
+        return $this->userIp;
+    }
+
+    /**
+     * @param $userIp
+     * @return $this
+     */
+    public function setUserIp($userIp)
+    {
+        $this->userIp = $userIp;
+        return $this;
     }
 
     /**
@@ -260,7 +298,17 @@ class Akismet {
      */
     public function getUserAgent()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
+        return $this->userAgent;
+    }
+
+    /**
+     * @param $userAgent
+     * @return $this
+     */
+    public function setUserAgent($userAgent)
+    {
+        $this->userAgent = $userAgent;
+        return $this;
     }
 
     /**
@@ -268,7 +316,17 @@ class Akismet {
      */
     public function getReferrer()
     {
-        return class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
+        return $this->referrer;
+    }
+
+    /**
+     * @param $referrer
+     * @return $this
+     */
+    public function setReferrer($referrer)
+    {
+        $this->referrer = $referrer;
+        return $this;
     }
 
     /**
@@ -276,7 +334,17 @@ class Akismet {
      */
     public function getPermalink()
     {
-        return class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
+        return $this->permalink;
+    }
+
+    /**
+     * @param $permalink
+     * @return $this
+     */
+    public function setPermalink($permalink)
+    {
+        $this->permalink = $permalink;
+        return $this;
     }
 
     /**
@@ -285,7 +353,8 @@ class Akismet {
     public function validateKey()
     {
         $client = new Client();
-        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['body' => [
+        $requestOption = $this->getRequestOption();
+        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [$requestOption => [
             'key'   => $this->getApiKey(),
             'blog'  => $this->getBlogUrl(),
         ]]);
@@ -349,7 +418,8 @@ class Akismet {
     private function getResponseData($url)
     {
         $client = new Client();
-        $request = $client->post($url, ['body' => $this->toArray()]);
+        $requestOption = $this->getRequestOption();
+        $request = $client->post($url, [$requestOption => $this->toArray()]);
 
         // Check if the response contains a X-akismet-debug-help header
         if($request->getHeader('X-akismet-debug-help'))
@@ -361,8 +431,16 @@ class Akismet {
     }
 
     /**
+     * @return string
+     */
+    private function getRequestOption()
+    {
+        return (version_compare(\GuzzleHttp\ClientInterface::VERSION, '6.0.0', '<')) ? 'body' : 'form_params';
+    }
+
+    /**
      * @return array
-     */ 
+     */
     public function toArray()
     {
         return [
@@ -378,5 +456,25 @@ class Akismet {
             'blog'                  =>  $this->getBlogUrl(),
             'is_test'               =>  $this->getIsTest(),
         ];
+    }
+
+    /**
+     * @return $this
+     */
+    public function fill(array $attributes)
+    {
+        if(isset($attributes['user_ip'])) $this->setUserIp($attributes['user_ip']);
+        if(isset($attributes['user_agent'])) $this->setUserAgent($attributes['user_agent']);
+        if(isset($attributes['referrer'])) $this->setReferrer($attributes['referrer']);
+        if(isset($attributes['permalink'])) $this->setPermalink($attributes['permalink']);
+        if(isset($attributes['comment_type'])) $this->setCommentType($attributes['comment_type']);
+        if(isset($attributes['comment_author'])) $this->setCommentAuthor($attributes['comment_author']);
+        if(isset($attributes['comment_author_email'])) $this->setCommentAuthorEmail($attributes['comment_author_email']);
+        if(isset($attributes['comment_author_url'])) $this->setCommentAuthorUrl($attributes['comment_author_url']);
+        if(isset($attributes['comment_content'])) $this->setCommentContent($attributes['comment_content']);
+        if(isset($attributes['blog'])) $this->setBlogUrl($attributes['blog']);
+        if(isset($attributes['is_test'])) $this->setIsTest($attributes['is_test']);
+
+        return $this;
     }
 }

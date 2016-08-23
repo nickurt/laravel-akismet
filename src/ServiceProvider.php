@@ -18,8 +18,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('nickurt\Akismet\Akismet', function($app)
-        {
+        $this->app->singleton('nickurt\Akismet\Akismet', function($app) {
             $config = $app['config']->get('akismet');
             $akismet = new Akismet;
             $akismet->setApiKey($config['api_key']);
@@ -40,8 +39,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $this->publishes([
             __DIR__.'/../config/akismet.php' => config_path('akismet.php'),
-        ]);
-        
+        ],'config');
     }
 
     /**

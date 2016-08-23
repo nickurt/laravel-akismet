@@ -3,7 +3,7 @@
 ### Installation
 Install this package with composer:
 ```
-php composer.phar require nickurt/laravel-akismet:dev-master
+php composer.phar require nickurt/laravel-akismet:1.*
 ```
 
 Add the provider to config/app.php file
@@ -21,18 +21,15 @@ and the facade in the file
 Copy the config files for the api
 
 ```
-php artisan vendor:publish
+php artisan vendor:publish --provider="nickurt\Akismet\ServiceProvider" --tag="config"
 ```
 
 ### Examples
 #### Validate Key
 ```php
-if( \Akismet::validateKey() ) 
-{
+if( \Akismet::validateKey() ) {
     // valid
-}
-else 
-{
+} else {
     // invalid
 }
 ```
@@ -52,46 +49,26 @@ else
 ```
 #### Get CommentAuthor Information
 ```php
-if( \Akismet::getCommentAuthor() == 'John Doe' )
-{
+if( \Akismet::getCommentAuthor() == 'John Doe' ) {
     // it's me John!
 }
 ```
 #### Is it Spam?
 ```php
-if( \Akismet::isSpam() )
-{
+if( \Akismet::isSpam() ) {
     // yes, i'm spam!
 }
 ```
 #### Submit Spam (missed spam)
 ```php
-if( \Akismet::reportSpam() )
-{
+if( \Akismet::reportSpam() ) {
     // yes, thanks!
 }
 ```
 #### Submit ham (false positives)
 ```php
-if( \Akismet::reportHam() )
-{
+if( \Akismet::reportHam() ) {
     // yes, thanks!
-}
-```
-#### Use as standalone (without Laravel)
-```php
-require_once __DIR__.'/../vendor/autoload.php';
-
-use \nickurt\Akismet\Akismet;
-
-$akismet = new Akismet();
-$akismet->setApiKey('MY_API_KEY');
-$akismet->setBlogUrl('https://www.google.com');
-$akismet->setCommentAuthor('John Doe');
-
-if( $akismet->isSpam() )
-{
-    // yes, i'm spam!
 }
 ```
 

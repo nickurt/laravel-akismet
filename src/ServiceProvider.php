@@ -19,10 +19,9 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     public function register()
     {
         $this->app->singleton('nickurt\Akismet\Akismet', function($app) {
-            $config = $app['config']->get('akismet');
             $akismet = new Akismet;
-            $akismet->setApiKey($config['api_key']);
-            $akismet->setBlogUrl($config['blog_url']);
+            $akismet->setApiKey(\Config::get('akismet.api_key'));
+            $akismet->setBlogUrl(\Config::get('akismet.blog_url') ?? url('/'));
 
             return $akismet;
         });

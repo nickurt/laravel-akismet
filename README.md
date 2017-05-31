@@ -8,13 +8,13 @@ php composer.phar require nickurt/laravel-akismet:1.*
 
 Add the provider to config/app.php file
 
-```
+```php
 'nickurt\Akismet\ServiceProvider',
 ```
 
 and the facade in the file
 
-```
+```php
 'Akismet' => 'nickurt\Akismet\Facade',
 ```
 
@@ -23,7 +23,12 @@ Copy the config files for the api
 ```
 php artisan vendor:publish --provider="nickurt\Akismet\ServiceProvider" --tag="config"
 ```
-
+### Configuration
+The Akismet information can be set with environment values in the .env file (or directly in the config/akismet.php file)
+```
+AKISMET_APIKEY=MY_UNIQUE_APIKEY
+AKISMET_BLOGURL=https://my-custom-blogurl.dev
+```
 ### Examples
 #### Validate Key
 ```php

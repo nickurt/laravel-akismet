@@ -1,5 +1,6 @@
 <?php
+
 return [
-    'api_key'   => '',
-    'blog_url'  => '',
+    'api_key'   => env('AKISMET_APIKEY', ''),
+    'blog_url'  => env('AKISMET_BLOGURL', url('/')),
 ];

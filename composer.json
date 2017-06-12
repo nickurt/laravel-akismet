@@ -12,5 +12,15 @@
             "nickurt\\Akismet\\": "src/"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "nickurt\\Akismet\\ServiceProvider"
+            ],
+            "aliases": {
+                "Akismet": "nickurt\\Akismet\\Facade"
+            }
+        }
+    }
 }

@@ -5,7 +5,8 @@ namespace nickurt\Akismet;
 use \GuzzleHttp\Client;
 use \nickurt\Akismet\Exception\MalformedURLException;
 
-class Akismet {
+class Akismet
+{
 
     /**
      * @var string
@@ -154,7 +155,7 @@ class Akismet {
      */
     public function setBlogUrl($blogUrl)
     {
-        if( filter_var($blogUrl, FILTER_VALIDATE_URL) === false ) {
+        if (filter_var($blogUrl, FILTER_VALIDATE_URL) === false) {
             throw new MalformedURLException();
         }
 
@@ -231,7 +232,7 @@ class Akismet {
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
     {
-        if( filter_var($commentAuthorUrl, FILTER_VALIDATE_URL) === false ) {
+        if (filter_var($commentAuthorUrl, FILTER_VALIDATE_URL) === false) {
             throw new MalformedURLException();
         }
 
@@ -422,8 +423,7 @@ class Akismet {
         $request = $client->post($url, [$requestOption => $this->toArray()]);
 
         // Check if the response contains a X-akismet-debug-help header
-        if($request->getHeader('X-akismet-debug-help'))
-        {
+        if ($request->getHeader('X-akismet-debug-help')) {
             throw new \Exception($request->getHeader('X-akismet-debug-help'));
         }
 
@@ -463,17 +463,39 @@ class Akismet {
      */
     public function fill(array $attributes)
     {
-        if(isset($attributes['user_ip'])) $this->setUserIp($attributes['user_ip']);
-        if(isset($attributes['user_agent'])) $this->setUserAgent($attributes['user_agent']);
-        if(isset($attributes['referrer'])) $this->setReferrer($attributes['referrer']);
-        if(isset($attributes['permalink'])) $this->setPermalink($attributes['permalink']);
-        if(isset($attributes['comment_type'])) $this->setCommentType($attributes['comment_type']);
-        if(isset($attributes['comment_author'])) $this->setCommentAuthor($attributes['comment_author']);
-        if(isset($attributes['comment_author_email'])) $this->setCommentAuthorEmail($attributes['comment_author_email']);
-        if(isset($attributes['comment_author_url'])) $this->setCommentAuthorUrl($attributes['comment_author_url']);
-        if(isset($attributes['comment_content'])) $this->setCommentContent($attributes['comment_content']);
-        if(isset($attributes['blog'])) $this->setBlogUrl($attributes['blog']);
-        if(isset($attributes['is_test'])) $this->setIsTest($attributes['is_test']);
+        if (isset($attributes['user_ip'])) {
+            $this->setUserIp($attributes['user_ip']);
+        }
+        if (isset($attributes['user_agent'])) {
+            $this->setUserAgent($attributes['user_agent']);
+        }
+        if (isset($attributes['referrer'])) {
+            $this->setReferrer($attributes['referrer']);
+        }
+        if (isset($attributes['permalink'])) {
+            $this->setPermalink($attributes['permalink']);
+        }
+        if (isset($attributes['comment_type'])) {
+            $this->setCommentType($attributes['comment_type']);
+        }
+        if (isset($attributes['comment_author'])) {
+            $this->setCommentAuthor($attributes['comment_author']);
+        }
+        if (isset($attributes['comment_author_email'])) {
+            $this->setCommentAuthorEmail($attributes['comment_author_email']);
+        }
+        if (isset($attributes['comment_author_url'])) {
+            $this->setCommentAuthorUrl($attributes['comment_author_url']);
+        }
+        if (isset($attributes['comment_content'])) {
+            $this->setCommentContent($attributes['comment_content']);
+        }
+        if (isset($attributes['blog'])) {
+            $this->setBlogUrl($attributes['blog']);
+        }
+        if (isset($attributes['is_test'])) {
+            $this->setIsTest($attributes['is_test']);
+        }
 
         return $this;
     }

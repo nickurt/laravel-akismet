@@ -4,32 +4,42 @@ namespace AkismetTests\Response;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
 
 class ReportSpamResponseTest extends TestCase
 {
     public function testResportSpamResponseInvalid()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [], 'invalid'),
+            new Response(202, ['Content-Length' => 7]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/reportspam-invalid.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
         $this->assertEquals('invalid', trim($response->getBody()));
     }
 
     public function testResportSpamResponseValid()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [], 'Thanks for making the web a better place.'),
+            new Response(202, ['Content-Length' => 41]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/reportspam-valid.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
         $this->assertEquals('Thanks for making the web a better place.', trim($response->getBody()));
     }

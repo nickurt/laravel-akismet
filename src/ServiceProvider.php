@@ -23,6 +23,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             $akismet->setApiKey(\Config::get('akismet.api_key'));
             $akismet->setBlogUrl(\Config::get('akismet.blog_url') ?? url('/'));
 
+            $akismet->setUserIp(\Request::getClientIp());
+            $akismet->setUserAgent(\Request::server('HTTP_USER_AGENT'));
+            $akismet->setReferrer(\URL::previous());
+            $akismet->setPermalink(\Request::url());
+
             return $akismet;
         });
 

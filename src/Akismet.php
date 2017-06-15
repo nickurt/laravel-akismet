@@ -78,14 +78,6 @@ class Akismet
      */
     protected $isTest = false;
 
-    public function __construct()
-    {
-        $this->userIp = class_exists('\Illuminate\Support\Facades\Request') ? \Request::getClientIp() : $_SERVER['REMOTE_ADDR'];
-        $this->userAgent = class_exists('\Illuminate\Support\Facades\Request') ? \Request::server('HTTP_USER_AGENT') : $_SERVER['HTTP_USER_AGENT'];
-        $this->referrer = class_exists('\Illuminate\Support\Facades\URL') ? \URL::previous() : $_SERVER['HTTP_REFERER'];
-        $this->permalink = class_exists('\Illuminate\Support\Facades\Request') ? \Request::url() : $_SERVER['REQUEST_URI'];
-    }
-
     /**
      * @return string
      */

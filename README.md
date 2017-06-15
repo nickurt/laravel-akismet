@@ -79,7 +79,7 @@ if( \Akismet::reportHam() ) {
 
 ### Tests
 ```sh
-bin/phpunit nickurt/laravel-akismet/tests
+vendor/bin/phpunit -c vendor/nickurt/laravel-akismet/tests
 ```
 
 - - - 

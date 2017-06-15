@@ -4,69 +4,95 @@ namespace AkismetTests\Response;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use GuzzleHttp\Client;
-use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
 
 class IsSpamResponseTest extends TestCase
 {
     public function testIsSpamResponseFalse()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [
+                'X-akismet-server' => '10.2.21.114',
+                'X-akismet-guid' => 'bf40a4e4ceb1833111fae80717ae6bc0'
+            ], 'false'),
+            new Response(202, ['Content-Length' => 5]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/isspam-false.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
-        $this->assertTrue($response->hasHeader("X-akismet-server"));
-        $this->assertTrue($response->hasHeader("X-akismet-guid"));
+        $this->assertTrue($response->hasHeader('X-akismet-server'));
+        $this->assertTrue($response->hasHeader('X-akismet-guid'));
 
         $this->assertEquals('false', trim($response->getBody()));
     }
 
     public function testIsSpamResponseSuccessful()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [
+                'X-akismet-server' => '10.2.21.114',
+                'X-akismet-guid' => 'bf40a4e4ceb1833111fae80717ae6bc0'
+            ], 'false'),
+            new Response(202, ['Content-Length' => 5]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/isspam-false.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
         $this->assertEquals(200, $response->getStatusCode());
     }
 
     public function testIsSpamResponseTrue()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [
+                'X-akismet-server' => '10.2.21.116',
+                'X-akismet-guid' => '5b47eb14befa91e4941f93d03859e34d'
+            ], 'true'),
+            new Response(202, ['Content-Length' => 4]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/isspam-true.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
-        $this->assertTrue($response->hasHeader("X-akismet-server"));
-        $this->assertTrue($response->hasHeader("X-akismet-guid"));
+        $this->assertTrue($response->hasHeader('X-akismet-server'));
+        $this->assertTrue($response->hasHeader('X-akismet-guid'));
 
         $this->assertEquals('true', trim($response->getBody()));
     }
 
     public function testIsSpamResponseMissingRequiredValues()
     {
-        $client = new Client();
+        $mock = new MockHandler([
+            new Response(200, [
+                'X-akismet-server' => '10.2.21.109',
+                'X-akismet-debug-help' => 'Empty "user_ip" value'
+            ], 'Missing required field: user_ip.'),
+            new Response(202, ['Content-Length' => 32]),
+            new RequestException("Error Communicating with Server", new Request('GET', 'test'))
+        ]);
 
-        $mock = new Mock();
-        $mock->addResponse(__DIR__.'/raw/isspam-missing.txt');
+        $handler = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handler]);
 
-        $client->getEmitter()->attach($mock);
-        $response = $client->get();
+        $response = $client->request('GET', '/');
 
-        $this->assertTrue($response->hasHeader("X-akismet-server"));
-        $this->assertTrue($response->hasHeader("X-akismet-debug-help"));
-
-        $this->assertSame('Empty "user_ip" value', $response->getHeader('X-akismet-debug-help'));
+        $this->assertTrue($response->hasHeader('X-akismet-server'));
+        $this->assertTrue($response->hasHeader('X-akismet-debug-help'));
 
         $this->assertEquals('Missing required field: user_ip.', trim($response->getBody()));
     }

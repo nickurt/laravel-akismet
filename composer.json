@@ -10,17 +10,10 @@
     "autoload": {
         "psr-4": {
             "nickurt\\Akismet\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
-    "minimum-stability": "dev",
-    "extra": {
-        "laravel": {
-            "providers": [
-                "nickurt\\Akismet\\ServiceProvider"
-            ],
-            "aliases": {
-                "Akismet": "nickurt\\Akismet\\Facade"
-            }
-        }
-    }
+    "minimum-stability": "dev"
 }

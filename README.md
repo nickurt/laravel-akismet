@@ -30,7 +30,29 @@ AKISMET_APIKEY=MY_UNIQUE_APIKEY
 AKISMET_BLOGURL=https://my-custom-blogurl.dev
 ```
 ### Examples
-#### Validate Key
+
+#### Validation Rule
+You can use a hidden-field `akismet` in your Form-Request to validate if the request is valid
+```php
+$validator = validator()->make(['akismet' => 'akismet'], ['akismet' => [new \nickurt\Akismet\Rules\AkismetRule(
+    request()->input('email'), request()->input('name')
+)]]);
+```
+The `AkismetRule` requires a `email` and `name` parameter to validate the request.
+#### Events
+You can listen to the `IsSpam`, `ReportSpam` and  `ReportHam` events, e.g. if you want to log all the `IsSpam`-requests in your application
+##### IsSpam Event
+This event will be fired when the request contains spam
+`nickurt\Akismet\Events\IsSpam`
+##### ReportSpam Event
+This event will be fired when you succesfully reported spam
+`nickurt\Akismet\Events\ReportSpam`
+##### ReportHam Event
+This event will be fired when you succesfully reported ham
+`nickurt\Akismet\Events\ReportHam`
+
+#### Custom Implementation
+##### Validate Key
 ```php
 if( \Akismet::validateKey() ) {
     // valid
@@ -38,7 +60,7 @@ if( \Akismet::validateKey() ) {
     // invalid
 }
 ```
-#### Set CommentAuthor Information
+##### Set CommentAuthor Information
 ```php
 \Akismet::setCommentAuthor("John Doe")
     ->setCommentAuthorUrl("https://www.google.com")
@@ -52,25 +74,25 @@ if( \Akismet::validateKey() ) {
 \Akismet::setCommentContent("It's me, John!");
 // etc
 ```
-#### Get CommentAuthor Information
+##### Get CommentAuthor Information
 ```php
 if( \Akismet::getCommentAuthor() == 'John Doe' ) {
     // it's me John!
 }
 ```
-#### Is it Spam?
+##### Is it Spam?
 ```php
 if( \Akismet::isSpam() ) {
     // yes, i'm spam!
 }
 ```
-#### Submit Spam (missed spam)
+##### Submit Spam (missed spam)
 ```php
 if( \Akismet::reportSpam() ) {
     // yes, thanks!
 }
 ```
-#### Submit ham (false positives)
+##### Submit ham (false positives)
 ```php
 if( \Akismet::reportHam() ) {
     // yes, thanks!

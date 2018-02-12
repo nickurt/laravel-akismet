@@ -7,7 +7,6 @@ use \nickurt\Akismet\Exception\MalformedURLException;
 
 class Akismet
 {
-
     /**
      * @var string
      */
@@ -358,6 +357,7 @@ class Akismet
     /**
      * isSpam
      * @return bool
+     * @throws \Exception
      */
     public function isSpam()
     {
@@ -368,12 +368,19 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        return (bool) (trim($response->getBody()) == 'true');
+        if((bool) (trim($response->getBody()) == 'true')) {
+            event(new \nickurt\Akismet\Events\IsSpam($this->getCommentAuthorEmail()));
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * reportSpam
      * @return bool
+     * @throws \Exception
      */
     public function reportSpam()
     {
@@ -384,12 +391,19 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        return (bool) (trim($response->getBody()) == 'Thanks for making the web a better place.');
+        if((bool) (trim($response->getBody()) == 'Thanks for making the web a better place.')) {
+            event(new \nickurt\Akismet\Events\ReportSpam($this->getCommentAuthorEmail()));
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * reportHam
      * @return bool
+     * @throws \Exception
      */
     public function reportHam()
     {
@@ -400,13 +414,19 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        return (bool) (trim($response->getBody()) == 'Thanks for making the web a better place.');
+        if((bool) (trim($response->getBody()) == 'Thanks for making the web a better place.')) {
+            event(new \nickurt\Akismet\Events\ReportHam($this->getCommentAuthorEmail()));
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * @param $url
+     * @return \Psr\Http\Message\ResponseInterface
      * @throws \Exception
-     * @return \GuzzleHttp\Message\FutureResponse|\GuzzleHttp\Message\ResponseInterface|\GuzzleHttp\Ring\Future\FutureInterface|null
      */
     private function getResponseData($url)
     {
@@ -451,6 +471,7 @@ class Akismet
     }
 
     /**
+     * @param array $attributes
      * @return $this
      */
     public function fill(array $attributes)

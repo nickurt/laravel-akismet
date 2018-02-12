@@ -41,8 +41,11 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
      */
     public function boot()
     {
+        $this->loadTranslationsFrom(__DIR__.'/../src/Resources/Lang', 'akismet');
+
         $this->publishes([
             __DIR__.'/../config/akismet.php' => config_path('akismet.php'),
+            __DIR__.'/../src/Resources/Lang' => resource_path('lang/vendor/akismet'),
         ], 'config');
     }
 

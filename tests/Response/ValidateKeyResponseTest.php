@@ -1,8 +1,8 @@
 <?php
 
-namespace AkismetTests\Response;
+namespace nickurt\Akismet\Tests\Response;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;

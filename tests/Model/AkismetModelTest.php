@@ -1,8 +1,8 @@
 <?php
 
-namespace AkismetTests\Model;
+namespace nickurt\Akismet\Tests\Model;
 
-use PHPUnit_Framework_TestCase as TestCase;
+use PHPUnit\Framework\TestCase;
 use nickurt\Akismet\Akismet;
 
 class AkismetModelTest extends TestCase

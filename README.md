@@ -3,7 +3,7 @@
 ### Installation
 Install this package with composer:
 ```
-php composer.phar require nickurt/laravel-akismet:1.*
+composer require nickurt/laravel-akismet
 ```
 
 Add the provider to config/app.php file

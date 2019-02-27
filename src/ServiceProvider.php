@@ -5,11 +5,29 @@ namespace nickurt\Akismet;
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     /**
-     * Indicates if loading of the provider is deferred.
+     * Bootstrap the application events.
      *
-     * @var bool
+     * @return void
      */
-    protected $defer = false;
+    public function boot()
+    {
+        $this->loadTranslationsFrom(__DIR__ . '/../src/Resources/Lang', 'akismet');
+
+        $this->publishes([
+            __DIR__ . '/../config/akismet.php' => config_path('akismet.php'),
+            __DIR__ . '/../src/Resources/Lang' => resource_path('lang/vendor/akismet'),
+        ], 'config');
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return ['nickurt\Akismet\Akismet', 'Akismet'];
+    }
 
     /**
      * Register the service provider.
@@ -32,30 +50,5 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         });
 
         $this->app->alias('nickurt\Akismet\Akismet', 'Akismet');
-    }
-
-    /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->loadTranslationsFrom(__DIR__.'/../src/Resources/Lang', 'akismet');
-
-        $this->publishes([
-            __DIR__.'/../config/akismet.php' => config_path('akismet.php'),
-            __DIR__.'/../src/Resources/Lang' => resource_path('lang/vendor/akismet'),
-        ], 'config');
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return ['nickurt\Akismet\Akismet', 'Akismet'];
     }
 }

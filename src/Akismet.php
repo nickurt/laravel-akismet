@@ -4,78 +4,54 @@ namespace nickurt\Akismet;
 
 use \GuzzleHttp\Client;
 use \nickurt\Akismet\Exception\MalformedURLException;
+use nickurt\PwnedPasswords\PwnedPasswords;
 
 class Akismet
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $apiBaseUrl = 'rest.akismet.com';
 
-    /**
-     * @var string
-     */
-    protected $apiVersion = '1.1';
-
-    /**
-     * @var
-     */
+    /** @var string */
     protected $apiKey;
 
-    /**
-     * @var
-     */
-    protected $userIp;
+    /** @var string */
+    protected $apiVersion = '1.1';
 
-    /**
-     * @var
-     */
-    protected $userAgent;
-
-    /**
-     * @var
-     */
-    protected $referrer;
-
-    /**
-     * @var
-     */
-    protected $permalink;
-
-    /**
-     * @var
-     */
+    /** @var string */
     protected $blogUrl;
 
-    /**
-     * @var
-     */
-    protected $commentType;
+    /** @var \GuzzleHttp\Client */
+    protected $client;
 
-    /**
-     * @var
-     */
+    /** @var string */
     protected $commentAuthor;
 
-    /**
-     * @var
-     */
+    /** @var string */
     protected $commentAuthorEmail;
 
-    /**
-     * @var
-     */
+    /** @var string */
     protected $commentAuthorUrl;
 
-    /**
-     * @var
-     */
+    /** @var string */
     protected $commentContent;
 
-    /**
-     * @var
-     */
+    /** @var string */
+    protected $commentType;
+
+    /** @var bool */
     protected $isTest = false;
+
+    /** @var string */
+    protected $permalink;
+
+    /** @var string */
+    protected $referrer;
+
+    /** @var string */
+    protected $userAgent;
+
+    /** @var string */
+    protected $userIp;
 
     /**
      * @param array $attributes
@@ -121,7 +97,6 @@ class Akismet
     }
 
     /**
-     * isSpam
      * @return bool
      * @throws \Exception
      */
@@ -144,22 +119,48 @@ class Akismet
     }
 
     /**
-     * @param $url
+     * @param string $url
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \Exception
      */
     private function getResponseData($url)
     {
-        $client = new Client();
-        $requestOption = $this->getRequestOption();
-        $request = $client->post($url, [$requestOption => $this->toArray()]);
-
-        // Check if the response contains a X-akismet-debug-help header
-        if ($request->getHeader('X-akismet-debug-help')) {
-            throw new \Exception($request->getHeader('X-akismet-debug-help'));
+        try {
+            $response = $this->getClient()->post($url, ['form_params' => $this->toArray()]);
+        } catch (\Exception $e) {
+            $response = $e->getResponse();
         }
 
-        return $request;
+        if ($response->hasHeader('X-akismet-debug-help')) {
+            throw new \nickurt\Akismet\Exception\AkismetException($response->getHeaderLine('X-akismet-debug-help'));
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return Client
+     */
+    public function getClient()
+    {
+        if (!isset($this->client)) {
+            $this->client = new \GuzzleHttp\Client();
+
+            return $this->client;
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @param $client
+     * @return $this
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+
+        return $this;
     }
 
     /**
@@ -191,12 +192,13 @@ class Akismet
     }
 
     /**
-     * @param $userIp
+     * @param string $userIp
      * @return $this
      */
     public function setUserIp($userIp)
     {
         $this->userIp = $userIp;
+
         return $this;
     }
 
@@ -209,12 +211,13 @@ class Akismet
     }
 
     /**
-     * @param $userAgent
+     * @param string $userAgent
      * @return $this
      */
     public function setUserAgent($userAgent)
     {
         $this->userAgent = $userAgent;
+
         return $this;
     }
 
@@ -227,12 +230,13 @@ class Akismet
     }
 
     /**
-     * @param $referrer
+     * @param string $referrer
      * @return $this
      */
     public function setReferrer($referrer)
     {
         $this->referrer = $referrer;
+
         return $this;
     }
 
@@ -245,17 +249,18 @@ class Akismet
     }
 
     /**
-     * @param $permalink
+     * @param string $permalink
      * @return $this
      */
     public function setPermalink($permalink)
     {
         $this->permalink = $permalink;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCommentType()
     {
@@ -263,17 +268,18 @@ class Akismet
     }
 
     /**
-     * @param $commentType
+     * @param string $commentType
      * @return $this
      */
     public function setCommentType($commentType)
     {
         $this->commentType = $commentType;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCommentAuthor()
     {
@@ -281,17 +287,18 @@ class Akismet
     }
 
     /**
-     * @param $commentAuthor
+     * @param string $commentAuthor
      * @return $this
      */
     public function setCommentAuthor($commentAuthor)
     {
         $this->commentAuthor = $commentAuthor;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCommentAuthorEmail()
     {
@@ -299,17 +306,18 @@ class Akismet
     }
 
     /**
-     * @param $commentAuthorEmail
+     * @param string $commentAuthorEmail
      * @return $this
      */
     public function setCommentAuthorEmail($commentAuthorEmail)
     {
         $this->commentAuthorEmail = $commentAuthorEmail;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCommentAuthorUrl()
     {
@@ -317,8 +325,7 @@ class Akismet
     }
 
     /**
-     * @param $commentAuthorUrl
-     * @throws \nickurt\Akismet\Exception\MalformedURLException
+     * @param string $commentAuthorUrl
      * @return $this
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
@@ -328,11 +335,12 @@ class Akismet
         }
 
         $this->commentAuthorUrl = $commentAuthorUrl;
+
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCommentContent()
     {
@@ -340,12 +348,36 @@ class Akismet
     }
 
     /**
-     * @param $commentContent
+     * @param string $commentContent
      * @return $this
      */
     public function setCommentContent($commentContent)
     {
         $this->commentContent = $commentContent;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBlogUrl()
+    {
+        return $this->blogUrl;
+    }
+
+    /**
+     * @param string $blogUrl
+     * @return $this
+     */
+    public function setBlogUrl($blogUrl)
+    {
+        if (filter_var($blogUrl, FILTER_VALIDATE_URL) === false) {
+            throw new MalformedURLException();
+        }
+
+        $this->blogUrl = $blogUrl;
+
         return $this;
     }
 
@@ -358,17 +390,74 @@ class Akismet
     }
 
     /**
-     * @param $isTest
+     * @param bool $isTest
      * @return $this
      */
     public function setIsTest($isTest)
     {
         $this->isTest = $isTest;
+
         return $this;
     }
 
     /**
-     * reportHam
+     * @return string
+     */
+    public function getApiKey()
+    {
+        return $this->apiKey;
+    }
+
+    /**
+     * @param string $apiKey
+     * @return $this
+     */
+    public function setApiKey($apiKey)
+    {
+        $this->apiKey = $apiKey;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApiBaseUrl()
+    {
+        return $this->apiBaseUrl;
+    }
+
+    /**
+     * @param string $apiBaseUrl
+     * @return $this
+     */
+    public function setApiBaseUrl($apiBaseUrl)
+    {
+        $this->apiBaseUrl = $apiBaseUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getApiVersion()
+    {
+        return $this->apiVersion;
+    }
+
+    /**
+     * @param string $apiVersion
+     * @return $this
+     */
+    public function setApiVersion($apiVersion)
+    {
+        $this->apiVersion = $apiVersion;
+
+        return $this;
+    }
+
+    /**
      * @return bool
      * @throws \Exception
      */
@@ -391,7 +480,6 @@ class Akismet
     }
 
     /**
-     * reportSpam
      * @return bool
      * @throws \Exception
      */
@@ -418,98 +506,19 @@ class Akismet
      */
     public function validateKey()
     {
-        $client = new Client();
-        $requestOption = $this->getRequestOption();
-        $response = $client->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [$requestOption => [
-            'key' => $this->getApiKey(),
-            'blog' => $this->getBlogUrl(),
-        ]]);
-
-        return (bool)($response->getBody() == 'valid');
-    }
-
-    /**
-     * @return string
-     */
-    private function getRequestOption()
-    {
-        return (version_compare(\GuzzleHttp\ClientInterface::VERSION, '6.0.0', '<')) ? 'body' : 'form_params';
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiBaseUrl()
-    {
-        return $this->apiBaseUrl;
-    }
-
-    /**
-     * @param $apiBaseUrl
-     * @return $this
-     */
-    public function setApiBaseUrl($apiBaseUrl)
-    {
-        $this->apiBaseUrl = $apiBaseUrl;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getApiVersion()
-    {
-        return $this->apiVersion;
-    }
-
-    /**
-     * @param $apiVersion
-     * @return $this
-     */
-    public function setApiVersion($apiVersion)
-    {
-        $this->apiVersion = $apiVersion;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getApiKey()
-    {
-        return $this->apiKey;
-    }
-
-    /**
-     * @param $apiKey
-     * @return $this
-     */
-    public function setApiKey($apiKey)
-    {
-        $this->apiKey = $apiKey;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBlogUrl()
-    {
-        return $this->blogUrl;
-    }
-
-    /**
-     * @param $blogUrl
-     * @throws \nickurt\Akismet\Exception\MalformedURLException
-     * @return $this
-     */
-    public function setBlogUrl($blogUrl)
-    {
-        if (filter_var($blogUrl, FILTER_VALIDATE_URL) === false) {
-            throw new MalformedURLException();
+        try {
+            $response = $this->getClient()->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['form_params' => [
+                'key' => $this->getApiKey(),
+                'blog' => $this->getBlogUrl(),
+            ]]);
+        } catch (\Exception $e) {
+            $response = $e->getResponse();
         }
 
-        $this->blogUrl = $blogUrl;
-        return $this;
+        if ($response->hasHeader('X-akismet-debug-help')) {
+            throw new \nickurt\Akismet\Exception\AkismetException($response->getHeaderLine('X-akismet-debug-help'));
+        }
+
+        return (bool)((string)$response->getBody() == 'valid');
     }
 }

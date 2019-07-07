@@ -6,23 +6,15 @@ use Illuminate\Contracts\Validation\Rule;
 
 class AkismetRule implements Rule
 {
-    /**
-     * @var
-     */
+    /** @var string */
     protected $email;
 
-    /**
-     * @var
-     */
+    /** @var string */
     protected $author;
 
     /**
-     * Create a new rule instance.
-     *
-     * @param $email
-     * @param $author
-     *
-     * @return void
+     * @param string $email
+     * @param string $author
      */
     public function __construct($email, $author)
     {
@@ -31,9 +23,7 @@ class AkismetRule implements Rule
     }
 
     /**
-     * Get the validation error message.
-     *
-     * @return string
+     * @return array|\Illuminate\Contracts\Translation\Translator|string|null
      */
     public function message()
     {
@@ -41,15 +31,14 @@ class AkismetRule implements Rule
     }
 
     /**
-     * Determine if the validation rule passes.
-     *
-     * @param  string $attribute
-     * @param  mixed $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        $akismet = akismet();
+        /** @var \nickurt\Akismet\Akismet $akismet */
+        $akismet = \Akismet::getFacadeRoot();
 
         if ($akismet->validateKey()) {
             $akismet->setCommentAuthor($this->author)

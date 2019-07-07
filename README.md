@@ -1,12 +1,17 @@
 ## Laravel Akismet
 
+[![Latest Stable Version](https://poser.pugx.org/nickurt/laravel-akismet/v/stable?format=flat-square)](https://packagist.org/packages/nickurt/laravel-akismet)
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Build Status](https://img.shields.io/travis/nickurt/laravel-akismet/master.svg?style=flat-square)](https://travis-ci.org/nickurt/laravel-akismet)
+[![Total Downloads](https://img.shields.io/packagist/dt/nickurt/laravel-akismet.svg?style=flat-square)](https://packagist.org/packages/nickurt/laravel-akismet)
+
 ### Installation
 Install this package with composer:
 ```
 composer require nickurt/laravel-akismet
 ```
 
-Add the provider to config/app.php file
+Add the provider to `config/app.php` file
 
 ```php
 'nickurt\Akismet\ServiceProvider',
@@ -24,7 +29,7 @@ Copy the config files for the api
 php artisan vendor:publish --provider="nickurt\Akismet\ServiceProvider" --tag="config"
 ```
 ### Configuration
-The Akismet information can be set with environment values in the .env file (or directly in the config/akismet.php file)
+The Akismet information can be set with environment values in the `.env` file (or directly in the `config/akismet.php` file)
 ```
 AKISMET_APIKEY=MY_UNIQUE_APIKEY
 AKISMET_BLOGURL=https://my-custom-blogurl.dev
@@ -34,6 +39,19 @@ AKISMET_BLOGURL=https://my-custom-blogurl.dev
 #### Validation Rule
 You can use a hidden-field `akismet` in your Form-Request to validate if the request is valid
 ```php
+// FormRequest ...
+
+public function rules()
+{
+    return [
+        'akismet' => [new \nickurt\Akismet\Rules\AkismetRule(
+            request()->input('email'), request()->input('name')
+        )]
+    ];
+}
+
+// Manually ...
+
 $validator = validator()->make(['akismet' => 'akismet'], ['akismet' => [new \nickurt\Akismet\Rules\AkismetRule(
     request()->input('email'), request()->input('name')
 )]]);
@@ -69,16 +87,12 @@ if( \Akismet::validateKey() ) {
     // etc
     
 // or
-\Akismet::setCommentAuthor("John Doe");
-\Akismet::setCommentAuthorUrl("https://www.google.com");
-\Akismet::setCommentContent("It's me, John!");
+\Akismet::fill([
+    'comment_author' => 'John Doe',
+    'comment_author_url' => 'https://www.google.com',
+    'comment_content' => 'It's me, John!'
+]);
 // etc
-```
-##### Get CommentAuthor Information
-```php
-if( \Akismet::getCommentAuthor() == 'John Doe' ) {
-    // it's me John!
-}
 ```
 ##### Is it Spam?
 ```php
@@ -92,7 +106,7 @@ if( \Akismet::reportSpam() ) {
     // yes, thanks!
 }
 ```
-##### Submit ham (false positives)
+##### Submit Ham (false positives)
 ```php
 if( \Akismet::reportHam() ) {
     // yes, thanks!
@@ -101,7 +115,7 @@ if( \Akismet::reportHam() ) {
 
 ### Tests
 ```sh
-phpunit
+composer test
 ```
 
 - - - 

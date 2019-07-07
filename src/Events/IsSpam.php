@@ -4,14 +4,11 @@ namespace nickurt\Akismet\Events;
 
 class IsSpam
 {
-    /**
-     * @var
-     */
+    /** @var string */
     public $email;
 
     /**
-     * IsSpam constructor.
-     * @param $email
+     * @param string $email
      */
     public function __construct($email)
     {

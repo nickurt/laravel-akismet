@@ -9,7 +9,8 @@
         "guzzlehttp/guzzle": "6.*"
     },
     "require-dev": {
-        "phpunit/phpunit" : "^7.5"
+        "phpunit/phpunit" : "^7.5",
+        "orchestra/testbench": "^3.8"
     },
     "autoload": {
         "psr-4": {
@@ -21,6 +22,10 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
     "extra": {
         "laravel": {
             "providers": [

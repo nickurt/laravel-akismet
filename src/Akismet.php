@@ -56,6 +56,7 @@ class Akismet
     /**
      * @param array $attributes
      * @return $this
+     * @throws MalformedURLException
      */
     public function fill(array $attributes)
     {
@@ -327,6 +328,7 @@ class Akismet
     /**
      * @param string $commentAuthorUrl
      * @return $this
+     * @throws MalformedURLException
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
     {
@@ -369,6 +371,7 @@ class Akismet
     /**
      * @param string $blogUrl
      * @return $this
+     * @throws MalformedURLException
      */
     public function setBlogUrl($blogUrl)
     {

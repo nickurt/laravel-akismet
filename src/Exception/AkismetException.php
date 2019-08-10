@@ -2,6 +2,6 @@
 
 namespace nickurt\Akismet\Exception;
 
-class AkismetException extends \RuntimeException
+class AkismetException extends \Exception
 {
 }

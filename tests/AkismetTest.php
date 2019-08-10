@@ -2,222 +2,209 @@
 
 namespace nickurt\Akismet\Tests;
 
-use Orchestra\Testbench\TestCase;
 use Akismet;
+use Event;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Psr7\Response;
+use Illuminate\Foundation\Application;
+use nickurt\Akismet\Events\IsSpam;
+use nickurt\Akismet\Events\ReportHam;
+use nickurt\Akismet\Events\ReportSpam;
+use nickurt\Akismet\Exception\AkismetException;
+use nickurt\Akismet\Exception\MalformedURLException;
+use nickurt\Akismet\Facade;
+use nickurt\Akismet\Rules\AkismetRule;
+use nickurt\Akismet\ServiceProvider;
+use Orchestra\Testbench\TestCase;
 
 class AkismetTest extends TestCase
 {
-    /**
-     * Define environment setup.
-     *
-     * @param \Illuminate\Foundation\Application $app
-     *
-     * @return void
-     */
-    protected function getEnvironmentSetUp($app)
-    {
-        $app['config']->set('akismet.api_key', 'abcdefghijklmnopqrstuvwxyz');
-        $app['config']->set('akismet.blog_url', 'http://akismet.local');
-    }
+    /** @var \nickurt\Akismet\Akismet */
+    protected $akismet;
 
-    /**
-     * @param \Illuminate\Foundation\Application $app
-     * @return array
-     */
-    protected function getPackageAliases($app)
+    public function setUp(): void
     {
-        return [
-            'Akismet' => \nickurt\Akismet\Facade::class
-        ];
-    }
+        parent::setUp();
 
-    /**
-     * @param \Illuminate\Foundation\Application $app
-     * @return array
-     */
-    protected function getPackageProviders($app)
-    {
-        return [
-            \nickurt\Akismet\ServiceProvider::class
-        ];
+        /** @var \nickurt\Akismet\Akismet akismet */
+        $this->akismet = Akismet::getFacadeRoot();
     }
 
     /** @test */
     public function it_can_fill_multiple_comment_filled_values_at_once()
     {
-        $akismet = \Akismet::getFacadeRoot();
+        $this->akismet->fill([
+            'comment_type' => 'registration',
+            'comment_author' => 'John Doe',
+            'comment_author_url' => 'https://google.nl',
+            'comment_author_email' => 'info@johndoe.ext',
+            'comment_content' => 'It\'s me, John!'
+        ]);
 
-        $akismet->fill(['comment_type' => 'registration', 'comment_author' => 'John Doe', 'comment_author_url' => 'https://google.nl', 'comment_author_email' => 'info@johndoe.ext', 'comment_content' => 'It\'s me, John!',]);
-
-        $this->assertSame($akismet->getCommentType(), 'registration');
-        $this->assertSame($akismet->getCommentAuthor(), 'John Doe');
-        $this->assertSame($akismet->getCommentAuthorUrl(), 'https://google.nl');
-        $this->assertSame($akismet->getCommentAuthorEmail(), 'info@johndoe.ext');
-        $this->assertSame($akismet->getCommentContent(), "It's me, John!");
+        $this->assertSame($this->akismet->getCommentType(), 'registration');
+        $this->assertSame($this->akismet->getCommentAuthor(), 'John Doe');
+        $this->assertSame($this->akismet->getCommentAuthorUrl(), 'https://google.nl');
+        $this->assertSame($this->akismet->getCommentAuthorEmail(), 'info@johndoe.ext');
+        $this->assertSame($this->akismet->getCommentContent(), "It's me, John!");
     }
 
     /** @test */
     public function it_can_get_the_http_client()
     {
-        $this->assertInstanceOf(\GuzzleHttp\Client::class, \Akismet::getClient());
+        $this->assertInstanceOf(Client::class, $this->akismet->getClient());
     }
 
     /** @test */
     public function it_can_return_the_default_values()
     {
-        $akismet = \Akismet::getFacadeRoot();
+        $this->assertSame('abcdefghijklmnopqrstuvwxyz', $this->akismet->getApiKey());
+        $this->assertSame('rest.akismet.com', $this->akismet->getApiBaseUrl());
+        $this->assertSame('1.1', $this->akismet->getApiVersion());
+        $this->assertSame('http://akismet.local', $this->akismet->getBlogUrl());
 
-        $this->assertSame('abcdefghijklmnopqrstuvwxyz', $akismet->getApiKey());
-        $this->assertSame('rest.akismet.com', $akismet->getApiBaseUrl());
-        $this->assertSame('1.1', $akismet->getApiVersion());
-        $this->assertSame('http://akismet.local', $akismet->getBlogUrl());
-
-        $this->assertSame('http://localhost', $akismet->getPermalink());
-        $this->assertSame('http://localhost', $akismet->getReferrer());
-        $this->assertSame('Symfony', $akismet->getUserAgent());
-        $this->assertSame('127.0.0.1', $akismet->getUserIp());
+        $this->assertSame('http://localhost', $this->akismet->getPermalink());
+        $this->assertSame('http://localhost', $this->akismet->getReferrer());
+        $this->assertSame('Symfony', $this->akismet->getUserAgent());
+        $this->assertSame('127.0.0.1', $this->akismet->getUserIp());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_is_test()
     {
-        $akismet = \Akismet::setIsTest(true);
+        $this->akismet->setIsTest(true);
 
-        $this->assertSame(true, $akismet->getIsTest());
+        $this->assertSame(true, $this->akismet->getIsTest());
 
-        $akismet = \Akismet::setIsTest(false);
+        $this->akismet->setIsTest(false);
 
-        $this->assertSame(false, $akismet->getIsTest());
+        $this->assertSame(false, $this->akismet->getIsTest());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_api_base_url()
     {
-        $akismet = \Akismet::setApiBaseUrl('rest-ppe.akismet.com');
+        $this->akismet->setApiBaseUrl('rest-ppe.akismet.com');
 
-        $this->assertSame('rest-ppe.akismet.com', $akismet->getApiBaseUrl());
+        $this->assertSame('rest-ppe.akismet.com', $this->akismet->getApiBaseUrl());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_api_key()
     {
-        $akismet = \Akismet::setApiKey('zyxwvutsrqponmlkjihgfedcba');
+        $this->akismet->setApiKey('zyxwvutsrqponmlkjihgfedcba');
 
-        $this->assertSame('zyxwvutsrqponmlkjihgfedcba', $akismet->getApiKey());
+        $this->assertSame('zyxwvutsrqponmlkjihgfedcba', $this->akismet->getApiKey());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_api_version()
     {
-        $akismet = \Akismet::setApiVersion('2.3');
+        $this->akismet->setApiVersion('2.3');
 
-        $this->assertSame('2.3', $akismet->getApiVersion());
+        $this->assertSame('2.3', $this->akismet->getApiVersion());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_blog_url()
     {
-        $akismet = \Akismet::setBlogUrl('http://akismet-ppe.local');
+        $this->akismet->setBlogUrl('http://akismet-ppe.local');
 
-        $this->assertSame('http://akismet-ppe.local', $akismet->getBlogUrl());
+        $this->assertSame('http://akismet-ppe.local', $this->akismet->getBlogUrl());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_comment_author()
     {
-        $akismet = \Akismet::setCommentAuthor('John Doe');
+        $this->akismet->setCommentAuthor('John Doe');
 
-        $this->assertSame('John Doe', $akismet->getCommentAuthor());
+        $this->assertSame('John Doe', $this->akismet->getCommentAuthor());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_comment_author_email()
     {
-        $akismet = \Akismet::setCommentAuthorEmail('john-doe@doe.tld');
+        $this->akismet->setCommentAuthorEmail('john-doe@doe.tld');
 
-        $this->assertSame('john-doe@doe.tld', $akismet->getCommentAuthorEmail());
+        $this->assertSame('john-doe@doe.tld', $this->akismet->getCommentAuthorEmail());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_comment_author_url()
     {
-        $akismet = \Akismet::setCommentAuthorUrl('https://john-doe.tld');
+        $this->akismet->setCommentAuthorUrl('https://john-doe.tld');
 
-        $this->assertSame('https://john-doe.tld', $akismet->getCommentAuthorUrl());
+        $this->assertSame('https://john-doe.tld', $this->akismet->getCommentAuthorUrl());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_comment_content()
     {
-        $akismet = \Akismet::setCommentContent('bla-bla-bla');
+        $this->akismet->setCommentContent('bla-bla-bla');
 
-        $this->assertSame('bla-bla-bla', $akismet->getCommentContent());
+        $this->assertSame('bla-bla-bla', $this->akismet->getCommentContent());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_comment_type()
     {
-        $akismet = \Akismet::setCommentType('registration');
+        $this->akismet->setCommentType('registration');
 
-        $this->assertSame('registration', $akismet->getCommentType());
+        $this->assertSame('registration', $this->akismet->getCommentType());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_permalink()
     {
-        $akismet = \Akismet::setPermalink('http://akismet-permalink.local/a/b/c/d/e/f');
+        $this->akismet->setPermalink('http://akismet-permalink.local/a/b/c/d/e/f');
 
-        $this->assertSame('http://akismet-permalink.local/a/b/c/d/e/f', $akismet->getPermalink());
+        $this->assertSame('http://akismet-permalink.local/a/b/c/d/e/f', $this->akismet->getPermalink());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_referrer()
     {
-        $akismet = \Akismet::setReferrer('http://akismet-referrer.local/f/e/d/c/b/a');
+        $this->akismet->setReferrer('http://akismet-referrer.local/f/e/d/c/b/a');
 
-        $this->assertSame('http://akismet-referrer.local/f/e/d/c/b/a', $akismet->getReferrer());
+        $this->assertSame('http://akismet-referrer.local/f/e/d/c/b/a', $this->akismet->getReferrer());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_user_ip()
     {
-        $akismet = \Akismet::setUserIp('118.25.6.39');
+        $this->akismet->setUserIp('118.25.6.39');
 
-        $this->assertSame('118.25.6.39', $akismet->getUserIp());
+        $this->assertSame('118.25.6.39', $this->akismet->getUserIp());
     }
 
     /** @test */
     public function it_can_set_a_custom_value_for_the_useragent()
     {
-        $akismet = \Akismet::setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36');
+        $this->akismet->setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36');
 
-        $this->assertSame('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36', $akismet->getUserAgent());
+        $this->assertSame('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36', $this->akismet->getUserAgent());
     }
 
     /** @test */
     public function it_can_set_multiple_comment_empty_values_at_once()
     {
-        $akismet = \Akismet::getFacadeRoot();
+        $this->akismet->fill(['comment_type' => '', 'comment_author' => '', 'comment_author_email' => '', 'comment_content' => '']);
 
-        $akismet->fill(['comment_type' => '', 'comment_author' => '', 'comment_author_email' => '', 'comment_content' => '']);
-
-        $this->assertSame($akismet->getCommentType(), '');
-        $this->assertSame($akismet->getCommentAuthor(), '');
-        $this->assertSame($akismet->getCommentAuthorEmail(), '');
-        $this->assertSame($akismet->getCommentContent(), '');
+        $this->assertSame($this->akismet->getCommentType(), '');
+        $this->assertSame($this->akismet->getCommentAuthor(), '');
+        $this->assertSame($this->akismet->getCommentAuthorEmail(), '');
+        $this->assertSame($this->akismet->getCommentContent(), '');
     }
 
     /** @test */
     public function it_can_set_multiple_comment_nulled_values_at_once()
     {
-        $akismet = \Akismet::getFacadeRoot();
+        $this->akismet->fill(['comment_type' => null, 'comment_author' => null, 'comment_author_email' => null, 'comment_content' => null]);
 
-        $akismet->fill(['comment_type' => null, 'comment_author' => null, 'comment_author_email' => null, 'comment_content' => null]);
-
-        $this->assertSame($akismet->getCommentType(), null);
-        $this->assertSame($akismet->getCommentAuthor(), null);
-        $this->assertSame($akismet->getCommentAuthorEmail(), null);
-        $this->assertSame($akismet->getCommentContent(), null);
+        $this->assertSame($this->akismet->getCommentType(), null);
+        $this->assertSame($this->akismet->getCommentAuthor(), null);
+        $this->assertSame($this->akismet->getCommentAuthorEmail(), null);
+        $this->assertSame($this->akismet->getCommentContent(), null);
     }
 
     /** @test */
@@ -237,22 +224,22 @@ class AkismetTest extends TestCase
     /** @test */
     public function it_will_fire_is_spam_event_by_a_spam_email_via_validation_rule()
     {
-        \Event::fake();
+        Event::fake();
 
-        \Akismet::setClient(new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'valid'),
-                new \GuzzleHttp\Psr7\Response(200, [
+        $this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'valid'),
+                new Response(200, [
                     "X-akismet-guid" => "33a400f82ab1df44aa75716efa99cc8c"
                 ], 'true')
             ]),
         ]));
 
-        $rule = new \nickurt\Akismet\Rules\AkismetRule('akismet-guaranteed-spam@example.com', 'viagra-test-123');
+        $rule = new AkismetRule('akismet-guaranteed-spam@example.com', 'viagra-test-123');
 
         $this->assertFalse($rule->passes('email', 'email'));
 
-        \Event::assertDispatched(\nickurt\Akismet\Events\IsSpam::class, function ($e) {
+        Event::assertDispatched(IsSpam::class, function ($e) {
             return ($e->email == 'akismet-guaranteed-spam@example.com');
         });
     }
@@ -260,80 +247,76 @@ class AkismetTest extends TestCase
     /** @test */
     public function it_will_not_fire_is_spam_event_by_a_spam_email_via_validation_rule()
     {
-        \Event::fake();
+        Event::fake();
 
-        \Akismet::setClient(new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'valid'),
-                new \GuzzleHttp\Psr7\Response(200, [
+        $this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'valid'),
+                new Response(200, [
                     "X-akismet-guid" => "33a400f82ab1df44aa75716efa99cc8c"
                 ], 'false')
             ]),
         ]));
 
-        $rule = new \nickurt\Akismet\Rules\AkismetRule('john-doe@doe.nl', 'John Doe');
+        $rule = new AkismetRule('john-doe@doe.nl', 'John Doe');
 
         $this->assertTrue($rule->passes('email', 'email'));
 
-        \Event::assertNotDispatched(\nickurt\Akismet\Events\IsSpam::class);
+        Event::assertNotDispatched(IsSpam::class);
     }
 
     /** @test */
     public function it_will_return_false_by_a_non_spam_comment_check()
     {
-        \Event::fake();
+        Event::fake();
 
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [
+        $this->assertFalse($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [
                     "X-akismet-guid" => "8a0c2c8981324a621707acdf958fc2ad"
                 ], 'false')
             ]),
-        ]);
+        ]))->setCommentAuthorEmail('john-doe@doe.nl')->isSpam());
 
-        $this->assertFalse(\Akismet::setClient($httpClient)->setCommentAuthorEmail('john-doe@doe.nl')->isSpam());
-
-        \Event::assertNotDispatched(\nickurt\Akismet\Events\IsSpam::class);
+        Event::assertNotDispatched(IsSpam::class);
     }
 
     /** @test */
     public function it_will_return_false_by_an_invalid_key_or_blog_url()
     {
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'invalid')
+        $this->assertFalse($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'invalid')
             ]),
-        ]);
-
-        $this->assertFalse(\Akismet::setClient($httpClient)->validateKey());
+        ]))->validateKey());
     }
 
     /** @test */
     public function it_will_return_true_by_a_valid_key_and_blog_url()
     {
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'valid')
+        $this->assertTrue($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'valid')
             ]),
-        ]);
+        ]))->validateKey());
 
-        $this->assertTrue(\Akismet::setClient($httpClient)->validateKey());
+        $this->assertSame('https://rest.akismet.com/1.1/verify-key', (string)$this->akismet->getClient()->getConfig()['handler']->getLastRequest()->getUri());
     }
 
     /** @test */
     public function it_will_return_true_by_a_valid_report_ham_to_akismet()
     {
-        \Event::fake();
+        Event::fake();
 
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'Thanks for making the web a better place.')
+        $this->assertTrue($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'Thanks for making the web a better place.')
             ]),
-        ]);
+        ]))->setCommentAuthorEmail('it-can-report-ham-to@akismet.com')->reportHam());
 
-        $this->assertTrue(\Akismet::setClient($httpClient)->setCommentAuthorEmail('it-can-report-ham-to@akismet.com')->reportHam());
+        $this->assertSame('https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/submit-ham', (string)$this->akismet->getClient()->getConfig()['handler']->getLastRequest()->getUri());
 
-        \Event::assertDispatched(\nickurt\Akismet\Events\ReportHam::class, function ($e) {
+        Event::assertDispatched(ReportHam::class, function ($e) {
             return ($e->email == 'it-can-report-ham-to@akismet.com');
         });
     }
@@ -341,17 +324,17 @@ class AkismetTest extends TestCase
     /** @test */
     public function it_will_return_true_by_a_valid_report_spam_to_akismet()
     {
-        \Event::fake();
+        Event::fake();
 
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [], 'Thanks for making the web a better place.')
+        $this->assertTrue($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [], 'Thanks for making the web a better place.')
             ]),
-        ]);
+        ]))->setCommentAuthorEmail('it-can-report-spam-to@akismet.com')->reportSpam());
 
-        $this->assertTrue(\Akismet::setClient($httpClient)->setCommentAuthorEmail('it-can-report-spam-to@akismet.com')->reportSpam());
+        $this->assertSame('https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/submit-spam', (string)$this->akismet->getClient()->getConfig()['handler']->getLastRequest()->getUri());
 
-        \Event::assertDispatched(\nickurt\Akismet\Events\ReportSpam::class, function ($e) {
+        Event::assertDispatched(ReportSpam::class, function ($e) {
             return ($e->email == 'it-can-report-spam-to@akismet.com');
         });
     }
@@ -359,19 +342,19 @@ class AkismetTest extends TestCase
     /** @test */
     public function it_will_return_true_by_a_valid_spam_comment_check()
     {
-        \Event::fake();
+        Event::fake();
 
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [
+        $this->assertTrue($this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [
                     "X-akismet-guid" => "33a400f82ab1df44aa75716efa99cc8c"
                 ], 'true')
             ]),
-        ]);
+        ]))->setCommentAuthorEmail('akismet-guaranteed-spam@example.com')->isSpam());
 
-        $this->assertTrue(\Akismet::setClient($httpClient)->setCommentAuthorEmail('akismet-guaranteed-spam@example.com')->isSpam());
+        $this->assertSame('https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/comment-check', (string)$this->akismet->getClient()->getConfig()['handler']->getLastRequest()->getUri());
 
-        \Event::assertDispatched(\nickurt\Akismet\Events\IsSpam::class, function ($e) {
+        Event::assertDispatched(IsSpam::class, function ($e) {
             return ($e->email == 'akismet-guaranteed-spam@example.com');
         });
     }
@@ -379,25 +362,58 @@ class AkismetTest extends TestCase
     /** @test */
     public function it_will_throw_exception_if_it_has_x_akismet_debug_help_header()
     {
-        $this->expectException(\nickurt\Akismet\Exception\AkismetException::class);
+        $this->expectException(AkismetException::class);
         $this->expectExceptionMessage('We were unable to parse your blog URI');
 
-        $httpClient = new \GuzzleHttp\Client([
-            'handler' => new \GuzzleHttp\Handler\MockHandler([
-                new \GuzzleHttp\Psr7\Response(200, [
+        $this->akismet->setClient(new Client([
+            'handler' => new MockHandler([
+                new Response(200, [
                     'X-akismet-debug-help' => 'We were unable to parse your blog URI'
                 ], 'invalid')
             ]),
-        ]);
-
-        \Akismet::setClient($httpClient)->setCommentAuthorEmail('john-doe@doe.nl')->isSpam();
+        ]))->setCommentAuthorEmail('john-doe@doe.nl')->isSpam();
     }
 
     /** @test */
     public function it_will_throw_malformed_url_exception()
     {
-        $this->expectException(\nickurt\Akismet\Exception\MalformedURLException::class);
+        $this->expectException(MalformedURLException::class);
 
-        \Akismet::setCommentAuthorUrl('malformed_url');
+        $this->akismet->setCommentAuthorUrl('malformed_url');
+    }
+
+    /**
+     * Define environment setup.
+     *
+     * @param Application $app
+     *
+     * @return void
+     */
+    protected function getEnvironmentSetUp($app)
+    {
+        $app['config']->set('akismet.api_key', 'abcdefghijklmnopqrstuvwxyz');
+        $app['config']->set('akismet.blog_url', 'http://akismet.local');
+    }
+
+    /**
+     * @param Application $app
+     * @return array
+     */
+    protected function getPackageAliases($app)
+    {
+        return [
+            'Akismet' => Facade::class
+        ];
+    }
+
+    /**
+     * @param Application $app
+     * @return array
+     */
+    protected function getPackageProviders($app)
+    {
+        return [
+            ServiceProvider::class
+        ];
     }
 }

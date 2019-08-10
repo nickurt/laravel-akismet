@@ -2,6 +2,6 @@
 
 namespace nickurt\Akismet\Exception;
 
-class MalformedURLException extends \RuntimeException
+class MalformedURLException extends \Exception
 {
 }

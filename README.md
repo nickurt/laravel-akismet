@@ -1,5 +1,4 @@
 ## Laravel Akismet
-
 [![Latest Stable Version](https://poser.pugx.org/nickurt/laravel-akismet/v/stable?format=flat-square)](https://packagist.org/packages/nickurt/laravel-akismet)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Build Status](https://img.shields.io/travis/nickurt/laravel-akismet/master.svg?style=flat-square)](https://travis-ci.org/nickurt/laravel-akismet)
@@ -10,21 +9,7 @@ Install this package with composer:
 ```
 composer require nickurt/laravel-akismet
 ```
-
-Add the provider to `config/app.php` file
-
-```php
-'nickurt\Akismet\ServiceProvider',
-```
-
-and the facade in the file
-
-```php
-'Akismet' => 'nickurt\Akismet\Facade',
-```
-
 Copy the config files for the api
-
 ```
 php artisan vendor:publish --provider="nickurt\Akismet\ServiceProvider" --tag="config"
 ```

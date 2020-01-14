@@ -4,7 +4,6 @@ namespace nickurt\Akismet;
 
 use \GuzzleHttp\Client;
 use \nickurt\Akismet\Exception\MalformedURLException;
-use nickurt\PwnedPasswords\PwnedPasswords;
 
 class Akismet
 {

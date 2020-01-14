@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 1.7.1 - 2020-01-14
+
+- Removed `nickurt\PwnedPasswords\PwnedPasswords` reference in `Akismet.php`
+
 ## 1.7.0 - 2019-12-02
 
 - Added support for PHP 7.4

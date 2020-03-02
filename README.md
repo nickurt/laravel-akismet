@@ -1,8 +1,8 @@
 ## Laravel Akismet
-[![Latest Stable Version](https://poser.pugx.org/nickurt/laravel-akismet/v/stable?format=flat-square)](https://packagist.org/packages/nickurt/laravel-akismet)
-[![MIT Licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
-[![Build Status](https://img.shields.io/travis/nickurt/laravel-akismet/master.svg?style=flat-square)](https://travis-ci.org/nickurt/laravel-akismet)
-[![Total Downloads](https://img.shields.io/packagist/dt/nickurt/laravel-akismet.svg?style=flat-square)](https://packagist.org/packages/nickurt/laravel-akismet)
+[![Build Status](https://github.com/nickurt/laravel-akismet/workflows/tests/badge.svg)](https://github.com/nickurt/laravel-akismet/actions)
+[![Total Downloads](https://poser.pugx.org/nickurt/laravel-akismet/d/total.svg)](https://packagist.org/packages/nickurt/laravel-akismet)
+[![Latest Stable Version](https://poser.pugx.org/nickurt/laravel-akismet/v/stable.svg)](https://packagist.org/packages/nickurt/laravel-akismet)
+[![MIT Licensed](https://poser.pugx.org/nickurt/laravel-akismet/license.svg)](LICENSE.md)
 
 ### Installation
 Install this package with composer:

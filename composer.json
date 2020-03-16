@@ -19,6 +19,11 @@
             "src/helpers.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "nickurt\\Akismet\\tests\\": "tests"
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {

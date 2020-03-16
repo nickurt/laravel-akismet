@@ -2,6 +2,9 @@
 
 namespace nickurt\Akismet;
 
+/**
+ * @see \nickurt\Akismet\Akismet
+ */
 class Facade extends \Illuminate\Support\Facades\Facade
 {
     /**

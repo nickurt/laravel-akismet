@@ -1,22 +1,17 @@
 <?php
 
-namespace nickurt\Akismet\Tests;
+namespace nickurt\Akismet\tests;
 
-use Akismet;
-use Event;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Psr7\Response;
-use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Event;
 use nickurt\Akismet\Events\IsSpam;
 use nickurt\Akismet\Events\ReportHam;
 use nickurt\Akismet\Events\ReportSpam;
 use nickurt\Akismet\Exception\AkismetException;
 use nickurt\Akismet\Exception\MalformedURLException;
-use nickurt\Akismet\Facade;
-use nickurt\Akismet\Rules\AkismetRule;
-use nickurt\Akismet\ServiceProvider;
-use Orchestra\Testbench\TestCase;
+use nickurt\Akismet\Facade as Akismet;
 
 class AkismetTest extends TestCase
 {
@@ -222,50 +217,6 @@ class AkismetTest extends TestCase
     }
 
     /** @test */
-    public function it_will_fire_is_spam_event_by_a_spam_email_via_validation_rule()
-    {
-        Event::fake();
-
-        $this->akismet->setClient(new Client([
-            'handler' => new MockHandler([
-                new Response(200, [], 'valid'),
-                new Response(200, [
-                    "X-akismet-guid" => "33a400f82ab1df44aa75716efa99cc8c"
-                ], 'true')
-            ]),
-        ]));
-
-        $rule = new AkismetRule('akismet-guaranteed-spam@example.com', 'viagra-test-123');
-
-        $this->assertFalse($rule->passes('email', 'email'));
-
-        Event::assertDispatched(IsSpam::class, function ($e) {
-            return ($e->email == 'akismet-guaranteed-spam@example.com');
-        });
-    }
-
-    /** @test */
-    public function it_will_not_fire_is_spam_event_by_a_spam_email_via_validation_rule()
-    {
-        Event::fake();
-
-        $this->akismet->setClient(new Client([
-            'handler' => new MockHandler([
-                new Response(200, [], 'valid'),
-                new Response(200, [
-                    "X-akismet-guid" => "33a400f82ab1df44aa75716efa99cc8c"
-                ], 'false')
-            ]),
-        ]));
-
-        $rule = new AkismetRule('john-doe@doe.nl', 'John Doe');
-
-        $this->assertTrue($rule->passes('email', 'email'));
-
-        Event::assertNotDispatched(IsSpam::class);
-    }
-
-    /** @test */
     public function it_will_return_false_by_a_non_spam_comment_check()
     {
         Event::fake();
@@ -380,40 +331,5 @@ class AkismetTest extends TestCase
         $this->expectException(MalformedURLException::class);
 
         $this->akismet->setCommentAuthorUrl('malformed_url');
-    }
-
-    /**
-     * Define environment setup.
-     *
-     * @param Application $app
-     *
-     * @return void
-     */
-    protected function getEnvironmentSetUp($app)
-    {
-        $app['config']->set('akismet.api_key', 'abcdefghijklmnopqrstuvwxyz');
-        $app['config']->set('akismet.blog_url', 'http://akismet.local');
-    }
-
-    /**
-     * @param Application $app
-     * @return array
-     */
-    protected function getPackageAliases($app)
-    {
-        return [
-            'Akismet' => Facade::class
-        ];
-    }
-
-    /**
-     * @param Application $app
-     * @return array
-     */
-    protected function getPackageProviders($app)
-    {
-        return [
-            ServiceProvider::class
-        ];
     }
 }

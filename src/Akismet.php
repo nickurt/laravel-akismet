@@ -19,7 +19,7 @@ class Akismet
     /** @var string */
     protected $blogUrl;
 
-    /** @var \GuzzleHttp\Client */
+    /** @var \GuzzleHttp\ClientInterface */
     protected $client;
 
     /** @var string */
@@ -139,7 +139,7 @@ class Akismet
     }
 
     /**
-     * @return Client
+     * @return \GuzzleHttp\ClientInterface
      */
     public function getClient()
     {
@@ -153,10 +153,10 @@ class Akismet
     }
 
     /**
-     * @param $client
+     * @param \GuzzleHttp\ClientInterface $client
      * @return $this
      */
-    public function setClient($client)
+    public function setClient(\GuzzleHttp\ClientInterface $client)
     {
         $this->client = $client;
 

@@ -1,12 +1,12 @@
 {
     "name": "nickurt/laravel-akismet",
-    "description": "Akismet for Laravel 6.x/7.x",
+    "description": "Akismet for Laravel 6.x/7.x/8.x",
     "keywords": ["akismet", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.2",
-        "laravel/framework": "^6.0|^7.0",
-        "guzzlehttp/guzzle": "^6.3"
+        "php": "^7.3",
+        "laravel/framework": "^6.0|^7.0|^8.0",
+        "guzzlehttp/guzzle": "^6.3|^7.0"
     },
     "require-dev": {
         "orchestra/testbench": "^4.0|^5.0"

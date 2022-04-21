@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 1.11.0 - 2022-04-21
+
+- Adding support for Laravel 9 (#19)
+
 ## 1.10.0 - 2020-12-06
 
 - Adding support for PHP 8.0, ditched PHP 7.2 and PHP 7.3

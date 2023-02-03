@@ -1,16 +1,19 @@
 {
     "name": "nickurt/laravel-akismet",
     "description": "Akismet for Laravel 8.x & 9.x",
-    "keywords": ["akismet", "laravel"],
+    "keywords": [
+        "akismet",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "laravel/framework": "^8.0|^9.0",
+        "laravel/framework": "^8.0|^9.0|^10.0",
         "guzzlehttp/guzzle": "^7.0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.8",
-        "orchestra/testbench": "^6.6|^7.0"
+        "orchestra/testbench": "^6.6|^7.0|^8.0"
     },
     "autoload": {
         "psr-4": {

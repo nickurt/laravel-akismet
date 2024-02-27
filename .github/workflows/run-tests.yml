@@ -7,53 +7,58 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-    php-tests:
-        runs-on: ${{ matrix.os }}
+  php-tests:
+    runs-on: ${{ matrix.os }}
 
-        strategy:
-            matrix:
-                php: [8.2, 8.1]
-                laravel: [9.*, 10.*]
-                dependency-version: [prefer-lowest, prefer-stable]
-                os: [ubuntu-latest]
-                include:
-                    - laravel: 10.*
-                      testbench: 8.*
-                    - laravel: 9.*
-                      testbench: 7.*
-                      dependency-version: prefer-lowest
-                    - laravel: 9.*
-                      testbench: 7.*
-                      dependency-version: prefer-stable
+    strategy:
+      matrix:
+        php: [8.2, 8.1]
+        laravel: ['9.*', '10.*', '11.*']
+        dependency-version: [prefer-lowest, prefer-stable]
+        os: [ubuntu-latest]
+        include:
+          - laravel: 10.*
+            testbench: 8.*
+          - laravel: 9.*
+            testbench: 7.*
+            dependency-version: prefer-lowest
+          - laravel: 9.*
+            testbench: 7.*
+            dependency-version: prefer-stable
+          - laravel: 11.*
+            testbench: 9.*
+        exclude:
+          - laravel: 11.*
+            php: 8.1
 
-        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-            -   name: Setup PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: ${{ matrix.php }}
-                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
-                    coverage: none
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+          coverage: none
 
-            -   name: Require dependencies
-                run: |
-                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+      - name: Require dependencies
+        run: |
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
-            -   name: Set Minimum PHP 8.1 Versions
-                uses: nick-invision/retry@v1
-                with:
-                    timeout_minutes: 5
-                    max_attempts: 5
-                    command: composer require symfony/symfony:5.4.x-dev laravel/framework:^8.67.0 --no-interaction --no-update
-                if: matrix.php >= 8.1 && matrix.laravel == '8.*'
+      - name: Set Minimum PHP 8.1 Versions
+        uses: nick-invision/retry@v1
+        with:
+          timeout_minutes: 5
+          max_attempts: 5
+          command: composer require symfony/symfony:5.4.x-dev laravel/framework:^8.67.0 --no-interaction --no-update
+        if: "matrix.php >= 8.1 && matrix.laravel == '8.*'"
 
-            -   name: Install dependencies
-                run: |
-                    composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+      - name: Install dependencies
+        run: |
+          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
 
-            -   name: Execute tests
-                run: vendor/bin/phpunit
+      - name: Execute tests
+        run: vendor/bin/phpunit

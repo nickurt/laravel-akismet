@@ -11,8 +11,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     /**
      * Define environment setup.
      *
-     * @param Application $app
-     *
+     * @param  Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -22,24 +21,24 @@ class TestCase extends \Orchestra\Testbench\TestCase
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      * @return array
      */
     protected function getPackageAliases($app)
     {
         return [
-            'Akismet' => Facade::class
+            'Akismet' => Facade::class,
         ];
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
     {
         return [
-            ServiceProvider::class
+            ServiceProvider::class,
         ];
     }
 }

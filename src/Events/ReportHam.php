@@ -8,7 +8,7 @@ class ReportHam
     public $email;
 
     /**
-     * @param string $email
+     * @param  string  $email
      */
     public function __construct($email)
     {

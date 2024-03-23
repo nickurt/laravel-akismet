@@ -13,8 +13,8 @@ class AkismetRule implements Rule
     protected $author;
 
     /**
-     * @param string $email
-     * @param string $author
+     * @param  string  $email
+     * @param  string  $author
      */
     public function __construct($email, $author)
     {
@@ -31,8 +31,8 @@ class AkismetRule implements Rule
     }
 
     /**
-     * @param string $attribute
-     * @param mixed $value
+     * @param  string  $attribute
+     * @param  mixed  $value
      * @return bool
      */
     public function passes($attribute, $value)

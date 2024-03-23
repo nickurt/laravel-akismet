@@ -2,8 +2,8 @@
 
 namespace nickurt\Akismet;
 
-use \GuzzleHttp\Client;
-use \nickurt\Akismet\Exception\MalformedURLException;
+use Illuminate\Support\Facades\Http;
+use nickurt\Akismet\Exception\MalformedURLException;
 
 class Akismet
 {
@@ -18,9 +18,6 @@ class Akismet
 
     /** @var string */
     protected $blogUrl;
-
-    /** @var \GuzzleHttp\ClientInterface */
-    protected $client;
 
     /** @var string */
     protected $commentAuthor;
@@ -53,8 +50,8 @@ class Akismet
     protected $userIp;
 
     /**
-     * @param array $attributes
      * @return $this
+     *
      * @throws MalformedURLException
      */
     public function fill(array $attributes)
@@ -98,6 +95,7 @@ class Akismet
 
     /**
      * @return bool
+     *
      * @throws \Exception
      */
     public function isSpam()
@@ -109,7 +107,7 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        if ((bool)(trim($response->getBody()) == 'true')) {
+        if ((bool) (trim($response->body()) == 'true')) {
             event(new \nickurt\Akismet\Events\IsSpam($this->getCommentAuthorEmail()));
 
             return true;
@@ -119,48 +117,25 @@ class Akismet
     }
 
     /**
-     * @param string $url
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws \Exception
+     * @return \Illuminate\Http\Client\Response|string
+     *
+     * @throws Exception\AkismetException
      */
     private function getResponseData($url)
     {
         try {
-            $response = $this->getClient()->post($url, ['form_params' => $this->toArray()]);
+            $response = Http::post($url, [
+                $this->toArray(),
+            ]);
         } catch (\Exception $e) {
-            $response = $e->getResponse();
+            $response = $e->getMessage();
         }
 
-        if ($response->hasHeader('X-akismet-debug-help')) {
-            throw new \nickurt\Akismet\Exception\AkismetException($response->getHeaderLine('X-akismet-debug-help'));
+        if ($response->header('X-akismet-debug-help')) {
+            throw new \nickurt\Akismet\Exception\AkismetException($response->header('X-akismet-debug-help'));
         }
 
         return $response;
-    }
-
-    /**
-     * @return \GuzzleHttp\ClientInterface
-     */
-    public function getClient()
-    {
-        if (!isset($this->client)) {
-            $this->client = new \GuzzleHttp\Client();
-
-            return $this->client;
-        }
-
-        return $this->client;
-    }
-
-    /**
-     * @param \GuzzleHttp\ClientInterface $client
-     * @return $this
-     */
-    public function setClient(\GuzzleHttp\ClientInterface $client)
-    {
-        $this->client = $client;
-
-        return $this;
     }
 
     /**
@@ -192,7 +167,7 @@ class Akismet
     }
 
     /**
-     * @param string $userIp
+     * @param  string  $userIp
      * @return $this
      */
     public function setUserIp($userIp)
@@ -211,7 +186,7 @@ class Akismet
     }
 
     /**
-     * @param string $userAgent
+     * @param  string  $userAgent
      * @return $this
      */
     public function setUserAgent($userAgent)
@@ -230,7 +205,7 @@ class Akismet
     }
 
     /**
-     * @param string $referrer
+     * @param  string  $referrer
      * @return $this
      */
     public function setReferrer($referrer)
@@ -249,7 +224,7 @@ class Akismet
     }
 
     /**
-     * @param string $permalink
+     * @param  string  $permalink
      * @return $this
      */
     public function setPermalink($permalink)
@@ -268,7 +243,7 @@ class Akismet
     }
 
     /**
-     * @param string $commentType
+     * @param  string  $commentType
      * @return $this
      */
     public function setCommentType($commentType)
@@ -287,7 +262,7 @@ class Akismet
     }
 
     /**
-     * @param string $commentAuthor
+     * @param  string  $commentAuthor
      * @return $this
      */
     public function setCommentAuthor($commentAuthor)
@@ -306,7 +281,7 @@ class Akismet
     }
 
     /**
-     * @param string $commentAuthorEmail
+     * @param  string  $commentAuthorEmail
      * @return $this
      */
     public function setCommentAuthorEmail($commentAuthorEmail)
@@ -325,8 +300,9 @@ class Akismet
     }
 
     /**
-     * @param string $commentAuthorUrl
+     * @param  string  $commentAuthorUrl
      * @return $this
+     *
      * @throws MalformedURLException
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
@@ -349,7 +325,7 @@ class Akismet
     }
 
     /**
-     * @param string $commentContent
+     * @param  string  $commentContent
      * @return $this
      */
     public function setCommentContent($commentContent)
@@ -368,8 +344,9 @@ class Akismet
     }
 
     /**
-     * @param string $blogUrl
+     * @param  string  $blogUrl
      * @return $this
+     *
      * @throws MalformedURLException
      */
     public function setBlogUrl($blogUrl)
@@ -392,7 +369,7 @@ class Akismet
     }
 
     /**
-     * @param bool $isTest
+     * @param  bool  $isTest
      * @return $this
      */
     public function setIsTest($isTest)
@@ -411,7 +388,7 @@ class Akismet
     }
 
     /**
-     * @param string $apiKey
+     * @param  string  $apiKey
      * @return $this
      */
     public function setApiKey($apiKey)
@@ -430,7 +407,7 @@ class Akismet
     }
 
     /**
-     * @param string $apiBaseUrl
+     * @param  string  $apiBaseUrl
      * @return $this
      */
     public function setApiBaseUrl($apiBaseUrl)
@@ -449,7 +426,7 @@ class Akismet
     }
 
     /**
-     * @param string $apiVersion
+     * @param  string  $apiVersion
      * @return $this
      */
     public function setApiVersion($apiVersion)
@@ -461,6 +438,7 @@ class Akismet
 
     /**
      * @return bool
+     *
      * @throws \Exception
      */
     public function reportHam()
@@ -472,7 +450,7 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        if ((bool)(trim($response->getBody()) == 'Thanks for making the web a better place.')) {
+        if ((bool) (trim($response->getBody()) == 'Thanks for making the web a better place.')) {
             event(new \nickurt\Akismet\Events\ReportHam($this->getCommentAuthorEmail()));
 
             return true;
@@ -483,6 +461,7 @@ class Akismet
 
     /**
      * @return bool
+     *
      * @throws \Exception
      */
     public function reportSpam()
@@ -494,7 +473,7 @@ class Akismet
                 $this->getApiVersion()
             ));
 
-        if ((bool)(trim($response->getBody()) == 'Thanks for making the web a better place.')) {
+        if ((bool) (trim($response->body()) == 'Thanks for making the web a better place.')) {
             event(new \nickurt\Akismet\Events\ReportSpam($this->getCommentAuthorEmail()));
 
             return true;
@@ -509,18 +488,18 @@ class Akismet
     public function validateKey()
     {
         try {
-            $response = $this->getClient()->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), ['form_params' => [
+            $response = Http::post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [
                 'key' => $this->getApiKey(),
                 'blog' => $this->getBlogUrl(),
-            ]]);
+            ]);
         } catch (\Exception $e) {
-            $response = $e->getResponse();
+            $response = $e->getMessage();
         }
 
-        if ($response->hasHeader('X-akismet-debug-help')) {
-            throw new \nickurt\Akismet\Exception\AkismetException($response->getHeaderLine('X-akismet-debug-help'));
+        if ($response->header('X-akismet-debug-help')) {
+            throw new \nickurt\Akismet\Exception\AkismetException($response->header('X-akismet-debug-help'));
         }
 
-        return (bool)((string)$response->getBody() == 'valid');
+        return (bool) ($response->body() == 'valid');
     }
 }

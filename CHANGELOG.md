@@ -2,9 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
-## 2.0.0 - 2024-xx-xx
+## 2.0.0 - 2024-11-08
 
 - Refactor'd Guzzle HttpClient to Laravel's native Http Client
+- setCommentAuthorUrl allowed to be null (#44)
 
 ## 1.13.0 - 2024-03-09
 

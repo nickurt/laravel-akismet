@@ -307,10 +307,6 @@ class Akismet
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
     {
-        if (filter_var($commentAuthorUrl, FILTER_VALIDATE_URL) === false) {
-            throw new MalformedURLException();
-        }
-
         $this->commentAuthorUrl = $commentAuthorUrl;
 
         return $this;

@@ -264,10 +264,10 @@ class AkismetTest extends TestCase
         $this->akismet->setCommentAuthorEmail('john-doe@doe.nl')->isSpam();
     }
 
-    public function test_it_will_throw_malformed_url_exception()
+    public function test_it_can_set_null_as_comment_author_url()
     {
-        $this->expectException(MalformedURLException::class);
+        $this->akismet->setCommentAuthorUrl(null);
 
-        $this->akismet->setCommentAuthorUrl('malformed_url');
+        $this->assertNull($this->akismet->getCommentAuthor());
     }
 }

@@ -124,9 +124,9 @@ class Akismet
     private function getResponseData($url)
     {
         try {
-            $response = Http::post($url, [
+            $response = Http::asForm()->post($url, 
                 $this->toArray(),
-            ]);
+            );
         } catch (\Exception $e) {
             $response = $e->getMessage();
         }
@@ -302,8 +302,6 @@ class Akismet
     /**
      * @param  string  $commentAuthorUrl
      * @return $this
-     *
-     * @throws MalformedURLException
      */
     public function setCommentAuthorUrl($commentAuthorUrl)
     {

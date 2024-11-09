@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 2.0.1 - 2024-11-09
+
+- Properly submit data to Akismet (#45)
+
 ## 2.0.0 - 2024-11-08
 
 - Refactor'd Guzzle HttpClient to Laravel's native Http Client

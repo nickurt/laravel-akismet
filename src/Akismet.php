@@ -124,7 +124,7 @@ class Akismet
     private function getResponseData($url)
     {
         try {
-            $response = Http::asForm()->post($url, 
+            $response = Http::asForm()->post($url,
                 $this->toArray(),
             );
         } catch (\Exception $e) {
@@ -482,7 +482,7 @@ class Akismet
     public function validateKey()
     {
         try {
-            $response = Http::post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [
+            $response = Http::asForm()->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [
                 'key' => $this->getApiKey(),
                 'blog' => $this->getBlogUrl(),
             ]);

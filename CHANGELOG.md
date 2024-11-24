@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 2.0.2 - 2024-11-24
+
+- validateKey always returns Empty "api_key" value. (#47)
+
 ## 2.0.1 - 2024-11-09
 
 - Properly submit data to Akismet (#45)

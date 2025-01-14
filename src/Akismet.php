@@ -34,6 +34,12 @@ class Akismet
     /** @var string */
     protected $commentType;
 
+    /** @var string */
+    protected $honeypotFieldName;
+
+    /** @var string */
+    protected $hiddenHoneypotField;
+
     /** @var bool */
     protected $isTest = false;
 
@@ -88,6 +94,12 @@ class Akismet
         }
         if (isset($attributes['is_test'])) {
             $this->setIsTest($attributes['is_test']);
+        }
+        if(isset($attributes['hidden_honeypot_field'])) {
+            $this->setHoneypotFieldName($attributes['hidden_honeypot_field']);
+        }
+        if(isset($attributes['honeypot_field_name'])) {
+            $this->setHoneypotFieldName($attributes['honeypot_field_name']);
         }
 
         return $this;
@@ -155,6 +167,8 @@ class Akismet
             'comment_content' => $this->getCommentContent(),
             'blog' => $this->getBlogUrl(),
             'is_test' => $this->getIsTest(),
+            'hidden_honeypot_field' => $this->getHiddenHoneypotField(),
+            'honeypot_field_name' => $this->getHoneypotFieldName()
         ];
     }
 
@@ -426,6 +440,46 @@ class Akismet
     public function setApiVersion($apiVersion)
     {
         $this->apiVersion = $apiVersion;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHiddenHoneypotField(): string
+    {
+        return $this->hiddenHoneypotField;
+    }
+
+    /**
+     * @param string $hiddenHoneypotField
+     * 
+     * @return self
+     */
+    public function setHiddenHoneypotField(string $hiddenHoneypotField): self
+    {
+        $this->hiddenHoneypotField = $hiddenHoneypotField;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHoneypotFieldName(): string
+    {
+        return $this->honeypotFieldName;
+    }
+
+    /**
+     * @param string $honeypotFieldName
+     * 
+     * @return self
+     */
+    public function setHoneypotFieldName(string $honeypotFieldName): self
+    {
+        $this->honeypotFieldName = $honeypotFieldName;
 
         return $this;
     }

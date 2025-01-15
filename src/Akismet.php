@@ -96,7 +96,7 @@ class Akismet
             $this->setIsTest($attributes['is_test']);
         }
         if(isset($attributes['hidden_honeypot_field'])) {
-            $this->setHoneypotFieldName($attributes['hidden_honeypot_field']);
+            $this->setHiddenHoneypotField($attributes['hidden_honeypot_field']);
         }
         if(isset($attributes['honeypot_field_name'])) {
             $this->setHoneypotFieldName($attributes['honeypot_field_name']);
@@ -445,19 +445,19 @@ class Akismet
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHiddenHoneypotField(): string
+    public function getHiddenHoneypotField(): ?string
     {
         return $this->hiddenHoneypotField;
     }
 
     /**
-     * @param string $hiddenHoneypotField
+     * @param string|null $hiddenHoneypotField
      * 
      * @return self
      */
-    public function setHiddenHoneypotField(string $hiddenHoneypotField): self
+    public function setHiddenHoneypotField(?string $hiddenHoneypotField): self
     {
         $this->hiddenHoneypotField = $hiddenHoneypotField;
 
@@ -465,19 +465,19 @@ class Akismet
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getHoneypotFieldName(): string
+    public function getHoneypotFieldName(): ?string
     {
         return $this->honeypotFieldName;
     }
 
     /**
-     * @param string $honeypotFieldName
+     * @param string|null $honeypotFieldName
      * 
      * @return self
      */
-    public function setHoneypotFieldName(string $honeypotFieldName): self
+    public function setHoneypotFieldName(?string $honeypotFieldName): self
     {
         $this->honeypotFieldName = $honeypotFieldName;
 

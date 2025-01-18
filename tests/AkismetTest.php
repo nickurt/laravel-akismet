@@ -156,6 +156,34 @@ class AkismetTest extends TestCase
         $this->assertSame('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36', $this->akismet->getUserAgent());
     }
 
+    public function test_it_can_set_a_custom_value_for_the_honeypot_field_name()
+    {
+        $this->akismet->setHoneypotFieldName('A honeypot fieldname');
+
+        $this->assertSame($this->akismet->getHoneypotFieldName(), 'A honeypot fieldname');
+    }
+
+    public function test_it_can_set_a_custom_value_for_the_hidden_honeypot_field()
+    {
+        $this->akismet->setHiddenHoneypotField('A hidden honeypot field value');
+
+        $this->assertSame($this->akismet->getHiddenHoneypotField(), 'A hidden honeypot field value');
+    }
+
+    public function test_it_can_set_null_as_honeypot_field_name()
+    {
+        $this->akismet->setHoneypotFieldName(null);
+
+        $this->assertSame($this->akismet->getHoneypotFieldName(), null);
+    }
+
+    public function test_it_can_set_null_as_hidden_honeypot_field()
+    {
+        $this->akismet->setHiddenHoneypotField(null);
+
+        $this->assertSame($this->akismet->getHiddenHoneypotField(), null);
+    }
+
     public function test_it_can_set_multiple_comment_empty_values_at_once()
     {
         $this->akismet->fill(['comment_type' => '', 'comment_author' => '', 'comment_author_email' => '', 'comment_content' => '']);
@@ -174,6 +202,28 @@ class AkismetTest extends TestCase
         $this->assertSame($this->akismet->getCommentAuthor(), null);
         $this->assertSame($this->akismet->getCommentAuthorEmail(), null);
         $this->assertSame($this->akismet->getCommentContent(), null);
+    }
+
+    public function test_it_can_set_multiple_honeypot_empty_values_at_once()
+    {
+        $this->akismet->fill([
+            'honeypot_field_name' => '',
+            'hidden_honeypot_field' => '',
+        ]);
+
+        $this->assertSame($this->akismet->getHoneypotFieldName(), '');
+        $this->assertSame($this->akismet->getHiddenHoneypotField(), '');
+    }
+
+    public function test_it_can_set_multiple_honeypot_nulled_values_at_once()
+    {
+        $this->akismet->fill([
+            'honeypot_field_name' => null,
+            'hidden_honeypot_field' => null,
+        ]);
+
+        $this->assertSame($this->akismet->getHoneypotFieldName(), null);
+        $this->assertSame($this->akismet->getHiddenHoneypotField(), null);
     }
 
     public function test_it_can_work_with_app_instance()

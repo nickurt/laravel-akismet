@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 2.1.0 - 2025-02-25
+
+- Adding support for Laravel 12
+
 ## 2.0.3 - 2025-01-18
 
 - Feature request: honeypot support (#49)

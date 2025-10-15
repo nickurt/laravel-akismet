@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 2.2.0 - 2025-10-15
+
+- Fix getResponseData header check for when an exception is thrown (#50)
+
 ## 2.1.0 - 2025-02-25
 
 - Adding support for Laravel 12

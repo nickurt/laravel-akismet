@@ -320,4 +320,20 @@ class AkismetTest extends TestCase
 
         $this->assertNull($this->akismet->getCommentAuthor());
     }
+
+	public function test_it_handles_http_client_exception_gracefully_on_comment_check()
+	{
+		Event::fake();
+
+		Http::fake([
+			'https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/comment-check' => function () {
+				throw new \Exception('connection failed');
+			},
+		]);
+
+        $this->expectException(AkismetException::class);
+        $this->expectExceptionMessage('connection failed');
+
+		$this->akismet->setCommentAuthorEmail('john-doe@doe.nl')->isSpam();
+	}
 }

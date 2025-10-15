@@ -129,7 +129,7 @@ class Akismet
     }
 
     /**
-     * @return \Illuminate\Http\Client\Response|string
+     * @return \Illuminate\Http\Client\Response
      *
      * @throws Exception\AkismetException
      */
@@ -140,7 +140,7 @@ class Akismet
                 $this->toArray(),
             );
         } catch (\Exception $e) {
-            $response = $e->getMessage();
+            throw new Exception\AkismetException($e->getMessage());
         }
 
         if ($response->header('X-akismet-debug-help')) {

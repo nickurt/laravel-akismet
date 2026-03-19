@@ -1,58 +1,47 @@
 name: tests
 
 on:
-  push:
-  pull_request:
-  schedule:
-    - cron: '0 0 * * *'
+    push:
+    pull_request:
+    schedule:
+        - cron: '0 0 * * *'
 
 jobs:
-  php-tests:
-    runs-on: ${{ matrix.os }}
+    php-tests:
+        runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        php: [8.3, 8.2]
-        laravel: ['11.*', '12.*', '13.*']
-        dependency-version: [prefer-lowest, prefer-stable]
-        os: [ubuntu-latest]
-        include:
-          - laravel: 12.*
-            testbench: 10.*
-            dependency-version: prefer-lowest
-          - laravel: 12.*
-            testbench: 10.*
-            dependency-version: prefer-stable
-          - laravel: 11.*
-            testbench: 9.*
-            dependency-version: prefer-lowest
-          - laravel: 11.*
-            testbench: 9.*
-            dependency-version: prefer-stable
-        exclude:
-          - laravel: 13.*
-            php: 8.2
+        strategy:
+            matrix:
+                php: [8.4]
+                laravel: [12.*, 13.*]
+                dependency-version: [prefer-lowest, prefer-stable]
+                os: [ubuntu-latest]
+                include:
+                    - laravel: 13.*
+                      testbench: 11.*
+                    - laravel: 12.*
+                      testbench: 10.*
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
+        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v2
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
-          coverage: none
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+                    coverage: none
 
-      - name: Require dependencies
-        run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+            -   name: Require dependencies
+                run: |
+                    composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
 
-      - name: Install dependencies
-        run: |
-          composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
+            -   name: Install dependencies
+                run: |
+                    composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-suggest
 
-      - name: Execute tests
-        run: vendor/bin/phpunit --no-coverage
+            -   name: Execute tests
+                run: vendor/bin/phpunit --no-coverage

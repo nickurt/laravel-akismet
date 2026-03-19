@@ -1,6 +1,6 @@
 {
     "name": "nickurt/laravel-akismet",
-    "description": "Akismet for Laravel 11.x & 12.x",
+    "description": "Akismet for Laravel 11.x/12.x/13.x",
     "keywords": [
         "akismet",
         "laravel"

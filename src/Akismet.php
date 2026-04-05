@@ -541,7 +541,7 @@ class Akismet
                 'blog' => $this->getBlogUrl(),
             ]);
         } catch (\Exception $e) {
-            $response = $e->getMessage();
+            return false;
         }
 
         if ($response->header('X-akismet-debug-help')) {

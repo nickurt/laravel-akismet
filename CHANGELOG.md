@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-akismet` will be documented in this file
 
+## 2.3.1 - 2026-04-06
+
+- Fix bug when validateKey http post fails (#52)
+
 ## 2.3.0 - 2026-03-19
 
 - Adding support for Laravel 13

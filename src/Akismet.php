@@ -2,7 +2,12 @@
 
 namespace nickurt\Akismet;
 
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use nickurt\Akismet\Events\IsSpam;
+use nickurt\Akismet\Events\ReportHam;
+use nickurt\Akismet\Events\ReportSpam;
+use nickurt\Akismet\Exception\AkismetException;
 use nickurt\Akismet\Exception\MalformedURLException;
 
 class Akismet
@@ -95,10 +100,10 @@ class Akismet
         if (isset($attributes['is_test'])) {
             $this->setIsTest($attributes['is_test']);
         }
-        if(isset($attributes['hidden_honeypot_field'])) {
+        if (isset($attributes['hidden_honeypot_field'])) {
             $this->setHiddenHoneypotField($attributes['hidden_honeypot_field']);
         }
-        if(isset($attributes['honeypot_field_name'])) {
+        if (isset($attributes['honeypot_field_name'])) {
             $this->setHoneypotFieldName($attributes['honeypot_field_name']);
         }
 
@@ -120,7 +125,7 @@ class Akismet
             ));
 
         if ((bool) (trim($response->body()) == 'true')) {
-            event(new \nickurt\Akismet\Events\IsSpam($this->getCommentAuthorEmail()));
+            event(new IsSpam($this->getCommentAuthorEmail()));
 
             return true;
         }
@@ -129,9 +134,9 @@ class Akismet
     }
 
     /**
-     * @return \Illuminate\Http\Client\Response
+     * @return Response
      *
-     * @throws Exception\AkismetException
+     * @throws AkismetException
      */
     private function getResponseData($url)
     {
@@ -140,11 +145,11 @@ class Akismet
                 $this->toArray(),
             );
         } catch (\Exception $e) {
-            throw new Exception\AkismetException($e->getMessage());
+            throw new AkismetException($e->getMessage());
         }
 
         if ($response->header('X-akismet-debug-help')) {
-            throw new \nickurt\Akismet\Exception\AkismetException($response->header('X-akismet-debug-help'));
+            throw new AkismetException($response->header('X-akismet-debug-help'));
         }
 
         return $response;
@@ -168,7 +173,7 @@ class Akismet
             'blog' => $this->getBlogUrl(),
             'is_test' => $this->getIsTest(),
             'hidden_honeypot_field' => $this->getHiddenHoneypotField(),
-            'honeypot_field_name' => $this->getHoneypotFieldName()
+            'honeypot_field_name' => $this->getHoneypotFieldName(),
         ];
     }
 
@@ -360,7 +365,7 @@ class Akismet
     public function setBlogUrl($blogUrl)
     {
         if (filter_var($blogUrl, FILTER_VALIDATE_URL) === false) {
-            throw new MalformedURLException();
+            throw new MalformedURLException;
         }
 
         $this->blogUrl = $blogUrl;
@@ -444,19 +449,11 @@ class Akismet
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getHiddenHoneypotField(): ?string
     {
         return $this->hiddenHoneypotField;
     }
 
-    /**
-     * @param string|null $hiddenHoneypotField
-     * 
-     * @return self
-     */
     public function setHiddenHoneypotField(?string $hiddenHoneypotField): self
     {
         $this->hiddenHoneypotField = $hiddenHoneypotField;
@@ -464,19 +461,11 @@ class Akismet
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getHoneypotFieldName(): ?string
     {
         return $this->honeypotFieldName;
     }
 
-    /**
-     * @param string|null $honeypotFieldName
-     * 
-     * @return self
-     */
     public function setHoneypotFieldName(?string $honeypotFieldName): self
     {
         $this->honeypotFieldName = $honeypotFieldName;
@@ -499,7 +488,7 @@ class Akismet
             ));
 
         if ((bool) (trim($response->getBody()) == 'Thanks for making the web a better place.')) {
-            event(new \nickurt\Akismet\Events\ReportHam($this->getCommentAuthorEmail()));
+            event(new ReportHam($this->getCommentAuthorEmail()));
 
             return true;
         }
@@ -522,7 +511,7 @@ class Akismet
             ));
 
         if ((bool) (trim($response->body()) == 'Thanks for making the web a better place.')) {
-            event(new \nickurt\Akismet\Events\ReportSpam($this->getCommentAuthorEmail()));
+            event(new ReportSpam($this->getCommentAuthorEmail()));
 
             return true;
         }
@@ -537,15 +526,15 @@ class Akismet
     {
         try {
             $response = Http::asForm()->post(sprintf('https://%s/%s/verify-key', $this->getApiBaseUrl(), $this->getApiVersion()), [
-                'key' => $this->getApiKey(),
+                'key' => $key = $this->getApiKey(),
                 'blog' => $this->getBlogUrl(),
             ]);
         } catch (\Exception $e) {
             return false;
         }
 
-        if ($response->header('X-akismet-debug-help')) {
-            throw new \nickurt\Akismet\Exception\AkismetException($response->header('X-akismet-debug-help'));
+        if ($key && $response->header('X-akismet-debug-help')) {
+            throw new AkismetException($response->header('X-akismet-debug-help'));
         }
 
         return (bool) ($response->body() == 'valid');

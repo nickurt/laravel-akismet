@@ -8,7 +8,6 @@ use nickurt\Akismet\Events\IsSpam;
 use nickurt\Akismet\Events\ReportHam;
 use nickurt\Akismet\Events\ReportSpam;
 use nickurt\Akismet\Exception\AkismetException;
-use nickurt\Akismet\Exception\MalformedURLException;
 use nickurt\Akismet\Facade as Akismet;
 
 class AkismetTest extends TestCase
@@ -249,9 +248,23 @@ class AkismetTest extends TestCase
         Event::assertNotDispatched(IsSpam::class);
     }
 
+    public function test_it_will_return_false_by_an_none_key_or_blog_url()
+    {
+        Http::fake(['https://rest.akismet.com/1.1/verify-key' => Http::response('invalid', 200, ['X-akismet-debug-help' => 'Empty "api_key" value'])]);
+
+        $this->assertFalse($this->akismet->setApiKey('')->validateKey());
+    }
+
     public function test_it_will_return_false_by_an_invalid_key_or_blog_url()
     {
         Http::fake(['https://rest.akismet.com/1.1/verify-key' => Http::response('invalid')]);
+
+        $this->assertFalse($this->akismet->setApiKey('invalid')->validateKey());
+    }
+
+    public function test_it_will_return_false_by_an_connection_error_key_validate()
+    {
+        Http::fake(['https://rest.akismet.com/1.1/verify-key' => Http::failedConnection()]);
 
         $this->assertFalse($this->akismet->validateKey());
     }
@@ -326,13 +339,11 @@ class AkismetTest extends TestCase
 		Event::fake();
 
 		Http::fake([
-			'https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/comment-check' => function () {
-				throw new \Exception('connection failed');
-			},
+			'https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/comment-check' => Http::failedConnection(),
 		]);
 
         $this->expectException(AkismetException::class);
-        $this->expectExceptionMessage('connection failed');
+        $this->expectExceptionMessage('cURL error 6: Could not resolve host: abcdefghijklmnopqrstuvwxyz.rest.akismet.com (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for https://abcdefghijklmnopqrstuvwxyz.rest.akismet.com/1.1/comment-check.');
 
 		$this->akismet->setCommentAuthorEmail('john-doe@doe.nl')->isSpam();
 	}
